@@ -1,0 +1,9 @@
+{
+  "name": "html-site",
+  "version": "1.0.0",
+  "description": "Static HTML site for Azure",
+  "main": "index.html",
+  "scripts": {
+    "start": "echo 'No server needed'"
+  }
+}

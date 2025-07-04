@@ -4,7 +4,6 @@
   "parameters": {
     "vmName": {
       "type": "string",
-      "defaultValue": "training1vm3",
       "metadata": {
         "description": "Name of the virtual machine"
       }

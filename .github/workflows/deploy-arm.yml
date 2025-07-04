@@ -3,11 +3,13 @@ name: Deploy ARM Template
 on:
   push:
     branches:
-      - main  # or your deployment branch
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: manual-approval  # Must match the GitHub environment you created
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v3

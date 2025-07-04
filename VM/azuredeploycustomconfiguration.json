@@ -10,7 +10,7 @@
     },
     "adminUsername": {
       "type": "string",
-      "defaultValue": "training1vm3",
+      "defaultValue": "azureuser",
       "metadata": {
         "description": "Admin username for the VM"
       }
@@ -38,34 +38,9 @@
   },
   "resources": [
     {
-      "type": "Microsoft.Network/virtualNetworks",
-      "apiVersion": "2021-02-01",
-      "name": "myVnet12",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "Microsoft.Network/networkSecurityGroups/training1vm3-nsg"
-       ],
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": ["10.0.0.0/16"]
-        },
-        "subnets": [
-          {
-            "name": "training1vnet3",
-            "properties": {
-              "addressPrefix": "10.0.0.0/24",
-              "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'training1vm3-nsg')]"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
       "type": "Microsoft.Network/networkSecurityGroups",
       "apiVersion": "2021-02-01",
-      "name": "training1vm3-nsg",
+      "name": "[concat(parameters('vmName'), '-nsg')]",
       "location": "[parameters('location')]",
       "properties": {
         "securityRules": [
@@ -80,9 +55,9 @@
               "access": "Allow",
               "priority": 1000,
               "direction": "Inbound"
-              }
-            },
-            {
+            }
+          },
+          {
             "name": "Allow-HTTP",
             "properties": {
               "protocol": "Tcp",
@@ -93,7 +68,32 @@
               "access": "Allow",
               "priority": 1100,
               "direction": "Inbound"
-            }            
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2021-02-01",
+      "name": "[concat(parameters('vmName'), '-vnet')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', concat(parameters('vmName'), '-nsg'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": ["10.0.0.0/16"]
+        },
+        "subnets": [
+          {
+            "name": "default",
+            "properties": {
+              "addressPrefix": "10.0.0.0/24",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(parameters('vmName'), '-nsg'))]"
+              }
+            }
           }
         ]
       }
@@ -101,7 +101,7 @@
     {
       "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2021-02-01",
-      "name": "training11vm3-ip",
+      "name": "[concat(parameters('vmName'), '-ip')]",
       "location": "[parameters('location')]",
       "zones": ["3"],
       "properties": {
@@ -114,22 +114,22 @@
     {
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2021-02-01",
-      "name": "training1vm3",
+      "name": "[concat(parameters('vmName'), '-nic')]",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "Microsoft.Network/virtualNetworks/myVnet12",
-        "Microsoft.Network/publicIPAddresses/training11vm3-ip"
+        "[resourceId('Microsoft.Network/virtualNetworks', concat(parameters('vmName'), '-vnet'))]",
+        "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('vmName'), '-ip'))]"
       ],
       "properties": {
         "ipConfigurations": [
           {
-            "name": "ipconfig11",
+            "name": "ipconfig1",
             "properties": {
               "subnet": {
-                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'myVnet12', 'training1vnet3')]"
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(parameters('vmName'), '-vnet'), 'default')]"
               },
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', 'training11vm3-ip')]"
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('vmName'), '-ip'))]"
               }
             }
           }
@@ -143,7 +143,7 @@
       "location": "[parameters('location')]",
       "zones": ["3"],
       "dependsOn": [
-        "Microsoft.Network/networkInterfaces/training1vm3"
+        "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), '-nic'))]"
       ],
       "properties": {
         "hardwareProfile": {
@@ -168,7 +168,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', 'training1vm3')]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), '-nic'))]"
             }
           ]
         }
@@ -205,4 +205,3 @@
     }
   }
 }
-

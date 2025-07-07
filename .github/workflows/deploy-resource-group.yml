@@ -21,7 +21,13 @@ jobs:
       uses: azure/login@v1 # Action to log in to Azure
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }} # GitHub Secret containing Azure Service Principal credentials
-
+        
+    - name: Debug - Print Environment Variables
+      run: |
+        echo "AZURE_RESOURCE_GROUP_NAME: ${{ env.AZURE_RESOURCE_GROUP_NAME }}"
+        echo "AZURE_RESOURCE_GROUP_LOCATION: ${{ env.AZURE_RESOURCE_GROUP_LOCATION }}"
+        echo "AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+        
     - name: Deploy Resource Group
       uses: azure/arm-deploy@v1 # Action to deploy an ARM template
       with:

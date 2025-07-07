@@ -26,9 +26,10 @@ jobs:
       uses: azure/arm-deploy@v1 # Action to deploy an ARM template
       with:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }} # GitHub Secret for your Azure Subscription ID
-        resourceGroupName: ${{ env.AZURE_RESOURCE_GROUP_NAME }} # The resource group where the deployment will run (can be the same as the one being created)
+        scope: subscription # <--- IMPORTANT CHANGE: Deploy at the subscription level
+        location: ${{ env.AZURE_RESOURCE_GROUP_LOCATION }} # <--- IMPORTANT CHANGE: Location for the deployment operation
         template: ./resourceGroup.json # Path to your ARM template file
         parameters: > # Parameters for your ARM template
           resourceGroupName=${{ env.AZURE_RESOURCE_GROUP_NAME }}
           resourceGroupLocation=${{ env.AZURE_RESOURCE_GROUP_LOCATION }}
-        failOnStdErr: true # Fail the workflow if there are errors in the deployment output
+        failOnStdErr: true # Fail the workflow if there are errors in the deployment outpu

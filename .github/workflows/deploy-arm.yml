@@ -35,7 +35,7 @@ jobs:
           subscriptionId: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
           resourceGroupName: training3
           template: ./VM/azuredeploycustomconfiguration.json
-          parameters: |
+          parameters: >
             vmName=${{ github.event.inputs.vmName }}
             adminUsername=${{ github.event.inputs.adminUsername }}
             adminPassword=${{ github.event.inputs.adminPassword }}

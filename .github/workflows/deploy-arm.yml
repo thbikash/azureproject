@@ -33,4 +33,4 @@ jobs:
           template: ./VM/azuredeploycustomconfiguration.json
           parameters: |
             vmName=${{ github.event.inputs.vmName }}
-            adminPassword=${{ github.event.inputs.adminPassword }}
+            adminPassword.value=${{ github.event.inputs.adminPassword }}

@@ -26,7 +26,7 @@ jobs:
       run: |
         echo "AZURE_RESOURCE_GROUP_NAME: ${{ env.AZURE_RESOURCE_GROUP_NAME }}"
         echo "AZURE_RESOURCE_GROUP_LOCATION: ${{ env.AZURE_RESOURCE_GROUP_LOCATION }}"
-        echo "AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+        echo "AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_CREDENTIALS }}"
         
     - name: Deploy Resource Group
       uses: azure/arm-deploy@v1 # Action to deploy an ARM template

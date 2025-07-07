@@ -14,6 +14,9 @@ on:
       adminPassword:
         description: 'Admin password for the VM'
         required: true
+      resourceGroup:
+        description: 'Resource Group for the VM'
+        required: true        
 
 jobs:
   deploy:
@@ -33,7 +36,7 @@ jobs:
         uses: azure/arm-deploy@v1
         with:
           subscriptionId: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
-          resourceGroupName: training3
+          resourceGroupName: ${{ github.event.inputs.resourceGroup }}
           template: ./VM/azuredeploycustomconfiguration.json
           parameters: >
             vmName=${{ github.event.inputs.vmName }}

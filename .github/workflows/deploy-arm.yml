@@ -34,4 +34,3 @@ jobs:
           parameters: |
             vmName=${{ github.event.inputs.vmName }}
             adminPassword=${{ github.event.inputs.adminPassword }}
-            adminPassword=${{ github.event.inputs.adminPassword }}

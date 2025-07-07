@@ -6,7 +6,7 @@ on:
       vmName:
         description: 'Name of the Virtual Machine'
         required: true
-        default: 'training1vm2'
+        default: 'trainingvm'
       adminPassword:
         description: 'Admin password for the VM'
         required: true
@@ -33,4 +33,5 @@ jobs:
           template: ./VM/azuredeploycustomconfiguration.json
           parameters: |
             vmName=${{ github.event.inputs.vmName }}
+            adminPassword=${{ github.event.inputs.adminPassword }}
             adminPassword=${{ github.event.inputs.adminPassword }}

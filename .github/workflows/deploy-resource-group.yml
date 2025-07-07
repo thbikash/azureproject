@@ -27,7 +27,7 @@ jobs:
       with:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }} # GitHub Secret for your Azure Subscription ID
         scope: subscription # <--- IMPORTANT CHANGE: Deploy at the subscription level
-        location: ${{ env.AZURE_RESOURCE_GROUP_LOCATION }} # <--- IMPORTANT CHANGE: Location for the deployment operation
+        location: eastus # <--- IMPORTANT CHANGE: Location for the deployment operation
         template: ./resourceGroup.json # Path to your ARM template file
         parameters: > # Parameters for your ARM template
           resourceGroupName=${{ env.AZURE_RESOURCE_GROUP_NAME }}

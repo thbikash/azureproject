@@ -6,7 +6,7 @@ on:
       - main # Trigger this workflow on pushes to the main branch
 
 env:
-  AZURE_RESOURCE_GROUP_NAME: my-github-deployed-rg # Replace with your desired resource group name
+  AZURE_RESOURCE_GROUP_NAME: training8 # Replace with your desired resource group name
   AZURE_RESOURCE_GROUP_LOCATION: eastus # Replace with your desired Azure region
 
 jobs:

@@ -11,12 +11,6 @@ on:
         description: 'Location of the Resource Group'
         required: true
         default: 'eastus'
-          
-        
-  
-  #AZURE_RESOURCE_GROUP_NAME: training8 # Replace with your desired resource group name
-  #AZURE_RESOURCE_GROUP_LOCATION: eastus # Replace with your desired Azure region
-
 jobs:
   deploy:
     runs-on: ubuntu-latest # Use a Linux runner

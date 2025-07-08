@@ -1,0 +1,35 @@
+name: Deploy Azure Resource Group
+
+on:
+  workflow_call:
+    inputs:
+      resourceGroupName:
+        required: true
+        type: string
+      resourceGroupLocation:
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+      - name: Deploy Resource Group
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
+          scope: subscription
+          region: ${{ inputs.resourceGroupLocation }}
+          template: ./RG/resourceGroup.json
+          parameters: >
+            resourceGroupName=${{ inputs.resourceGroupName }}
+            resourceGroupLocation=${{ inputs.resourceGroupLocation }}
+

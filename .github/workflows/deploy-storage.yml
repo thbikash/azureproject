@@ -49,8 +49,8 @@ jobs:
         resourceGroupName: ${{ github.event.inputs.resource_group }}
         template: ./STORAGEACC/createStorageAccount.json # Path to your ARM template file
         parameters: > # Parameters for your ARM template
-          storage_name=${{ github.event.inputs.storage_name }}
-          storage_location=${{ github.event.inputs.storage_location }}
-          storage_sku=${{ github.event.inputs.storage_sku }}
+          name=${{ github.event.inputs.storage_name }}
+          location=${{ github.event.inputs.storage_location }}
+          SKU=${{ github.event.inputs.storage_sku }}
         failOnStdErr: true # Fail the workflow if there are errors in the deployment output
         

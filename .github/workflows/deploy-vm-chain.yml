@@ -51,11 +51,10 @@ jobs:
         with:
           subscriptionId: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
           resourceGroupName: ${{ github.event.inputs.resourceGroup }}
-          group_location: ${{ github.event.inputs.group_location }}
+          region: ${{ github.event.inputs.group_location }}
           template: ./VM/azuredeploycustomconfiguration.json
           parameters: >
             vmName=${{ github.event.inputs.vmName }}
             adminUsername=${{ github.event.inputs.adminUsername }}
             adminPassword=${{ github.event.inputs.adminPassword }}
-            group_name=${{ inputs.group_name }}
-          
+                 

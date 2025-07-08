@@ -1,4 +1,4 @@
-name: Deploy Azure Resource Group
+name: Deploy Chain AZ RG
 
 on:
   workflow_call:

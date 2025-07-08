@@ -40,4 +40,5 @@ jobs:
         parameters: > # Parameters for your ARM template
           resourceGroupName=${{ github.event.inputs.group_name }}
           resourceGroupLocation=${{ github.event.inputs.group_location }}
-        failOnStdErr: true # Fail the workflow if there are errors in the deployment outpu
+        failOnStdErr: true # Fail the workflow if there are errors in the deployment output
+        

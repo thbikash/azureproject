@@ -1,0 +1,44 @@
+name: Deploy Azure Resource Group
+
+on:
+  workflow_call:
+    inputs:
+      group_name:
+        description: 'Name of the Resource Group'
+        required: true
+        default: 'traininggroup'
+      group_location:
+        description: 'Location of the Resource Group'
+        required: true
+        default: 'eastus'
+jobs:
+  deploy:
+    runs-on: ubuntu-latest # Use a Linux runner
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4 # Action to check out your repository code
+
+    - name: Azure Login
+      uses: azure/login@v1 # Action to log in to Azure
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }} # GitHub Secret containing Azure Service Principal credentials
+        
+    - name: Debug - Print Environment Variables
+      run: |
+        echo "AZURE_RESOURCE_GROUP_NAME: ${{ github.event.inputs.group_name }}"
+        echo "AZURE_RESOURCE_GROUP_LOCATION: ${{ github.event.inputs.group_location }}"
+        echo "AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_CREDENTIALS }}"
+        
+    - name: Deploy Resource Group
+      uses: azure/arm-deploy@v1 # Action to deploy an ARM template
+      with:
+        subscriptionId: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }} # GitHub Secret for your Azure Subscription ID
+        scope: subscription # <--- IMPORTANT CHANGE: Deploy at the subscription level
+        region: eastus # <--- IMPORTANT CHANGE: Location for the deployment operation
+        template: ./RG/resourceGroup.json # Path to your ARM template file
+        parameters: > # Parameters for your ARM template
+          resourceGroupName=${{ github.event.inputs.group_name }}
+          resourceGroupLocation=${{ github.event.inputs.group_location }}
+        failOnStdErr: true # Fail the workflow if there are errors in the deployment output
+        

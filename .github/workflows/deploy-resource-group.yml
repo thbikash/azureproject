@@ -1,13 +1,21 @@
 name: Deploy Azure Resource Group
 
 on:
-  push:
-    branches:
-      - main # Trigger this workflow on pushes to the main branch
-
-env:
-  AZURE_RESOURCE_GROUP_NAME: training8 # Replace with your desired resource group name
-  AZURE_RESOURCE_GROUP_LOCATION: eastus # Replace with your desired Azure region
+  workflow_dispatch:
+    inputs:
+      group_name:
+        description: 'Name of the Resource Group'
+        required: true
+        default: 'traininggroup'
+      group_location:
+        description: 'Location of the Resource Group'
+        required: true
+        default: 'eastus'
+          
+        
+  
+  #AZURE_RESOURCE_GROUP_NAME: training8 # Replace with your desired resource group name
+  #AZURE_RESOURCE_GROUP_LOCATION: eastus # Replace with your desired Azure region
 
 jobs:
   deploy:
@@ -24,8 +32,8 @@ jobs:
         
     - name: Debug - Print Environment Variables
       run: |
-        echo "AZURE_RESOURCE_GROUP_NAME: ${{ env.AZURE_RESOURCE_GROUP_NAME }}"
-        echo "AZURE_RESOURCE_GROUP_LOCATION: ${{ env.AZURE_RESOURCE_GROUP_LOCATION }}"
+        echo "AZURE_RESOURCE_GROUP_NAME: ${{ group_name.AZURE_RESOURCE_GROUP_NAME }}"
+        echo "AZURE_RESOURCE_GROUP_LOCATION: ${{ group_location.AZURE_RESOURCE_GROUP_LOCATION }}"
         echo "AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_CREDENTIALS }}"
         
     - name: Deploy Resource Group
@@ -36,6 +44,6 @@ jobs:
         region: eastus # <--- IMPORTANT CHANGE: Location for the deployment operation
         template: ./RG/resourceGroup.json # Path to your ARM template file
         parameters: > # Parameters for your ARM template
-          resourceGroupName=${{ env.AZURE_RESOURCE_GROUP_NAME }}
-          resourceGroupLocation=${{ env.AZURE_RESOURCE_GROUP_LOCATION }}
+          resourceGroupName=${{ group_name.AZURE_RESOURCE_GROUP_NAME }}
+          resourceGroupLocation=${{ group_location.AZURE_RESOURCE_GROUP_LOCATION }}
         failOnStdErr: true # Fail the workflow if there are errors in the deployment outpu

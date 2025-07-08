@@ -1,0 +1,56 @@
+name: Deploy Storage Account
+
+on:
+  workflow_dispatch:
+    inputs:
+      storage_name:
+        description: 'Name of the Storage Account'
+        required: true
+        
+      storage_location:
+        description: 'Location of the Storage Account'
+        required: true
+        default: 'eastus'
+        
+      storage_sku:
+        description: 'SKU of the Storage Account'
+        required: true
+        default: 'Standard_LRS'    
+      
+      resource_group:
+        description: 'ResourceGroup for the Storage Account'
+        required: true
+     
+        
+jobs:
+  deploy:
+    runs-on: ubuntu-latest # Use a Linux runner
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4 # Action to check out your repository code
+
+    - name: Azure Login
+      uses: azure/login@v1 # Action to log in to Azure
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }} # GitHub Secret containing Azure Service Principal credentials
+        
+    - name: Debug - Print Environment Variables
+      run: |
+        echo "STORAGE_ACCOUNT_NAME: ${{ github.event.inputs.storage_name }}"
+        echo "STORAGE_LOCATION: ${{ github.event.inputs.storage_location }}"
+        echo "STORAGE_SKU: ${{ github.event.inputs.storage_sku }}"
+        echo "AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_CREDENTIALS }}"
+        
+    - name: Deploy Resource Group
+      uses: azure/arm-deploy@v1 # Action to deploy an ARM template
+      with:
+        subscriptionId: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }} # GitHub Secret for your Azure Subscription ID
+        resourceGroupName: ${{ github.event.inputs.resource_group }}
+        template: ./STORAGEACC/createStorageAccount.json # Path to your ARM template file
+        parameters: > # Parameters for your ARM template
+          storage_name=${{ github.event.inputs.storage_name }}
+          storage_location=${{ github.event.inputs.storage_location }}
+          storage_sku=${{ github.event.inputs.storage_sku }}
+        failOnStdErr: true # Fail the workflow if there are errors in the deployment output
+        

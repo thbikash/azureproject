@@ -22,8 +22,8 @@ jobs:
   call-rg:
     uses: ./.github/workflows/deploy-rg.yml
     with:
-      resourceGroupName: ${{ github.event.inputs.resourceGroupName }}
-      location: ${{ github.event.inputs.location }}
+      resourceGroupName: ${{ github.event.inputs.group_name }}
+      location: ${{ github.event.inputs.group_location }}
   
   deploy:
     runs-on: ubuntu-latest

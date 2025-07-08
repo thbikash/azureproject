@@ -50,7 +50,7 @@ jobs:
         uses: azure/arm-deploy@v1
         with:
           subscriptionId: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
-          resourceGroupName: ${{ github.event.inputs.resourceGroup }}
+          resourceGroupName: ${{ github.event.inputs.group_name }}
           region: ${{ github.event.inputs.group_location }}
           template: ./VM/azuredeploycustomconfiguration.json
           parameters: >

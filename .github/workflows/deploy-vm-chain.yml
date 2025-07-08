@@ -57,5 +57,4 @@ jobs:
             vmName=${{ github.event.inputs.vmName }}
             adminUsername=${{ github.event.inputs.adminUsername }}
             adminPassword=${{ github.event.inputs.adminPassword }}
-            group_name=${{ github.event.inputs.group_name }}
                  

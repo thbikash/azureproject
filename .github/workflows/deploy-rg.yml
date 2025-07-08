@@ -6,10 +6,12 @@ on:
       group_name:
         description: 'Name of the Resource Group'
         required: true
+        type: string
         default: 'traininggroup'
       group_location:
         description: 'Location of the Resource Group'
         required: true
+        type: string
         default: 'eastus'
 jobs:
   deploy:

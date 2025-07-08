@@ -13,6 +13,10 @@ on:
         required: true
         type: string
         default: 'eastus'
+    secrets: 
+      AZURE_CREDENTIALS:
+        required: true
+          
 jobs:
   deploy:
     runs-on: ubuntu-latest # Use a Linux runner

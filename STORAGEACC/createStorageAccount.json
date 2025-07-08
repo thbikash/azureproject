@@ -1,0 +1,46 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Storage Account to create."
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location for the Storage Account."
+            }
+        },
+                       
+        "SKU": {
+            "type": "string",
+            "metadata": {
+                "description": "Sku for the Storage Account."
+            }
+        },
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2023-01-01",
+            "name": "[parameters('name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "[parameters('SKU')]"
+            },
+            "kind": "StorageV2",
+            "properties": {
+                "accessTier": "Hot"
+            }
+        }
+    ],
+    "outputs": {
+        "storageAccountPrimaryEndpoint": {
+            "type": "string",
+            "value": "[reference(parameters('name')).primaryEndpoints.blob]"
+        }
+    }
+}

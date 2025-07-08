@@ -16,7 +16,11 @@ on:
         required: true
       group_name:
         description: 'Resource Group for the VM'
-        required: true        
+        required: true     
+      group_location:
+        description: 'Resource Location for the VM'
+        required: true   
+        
 
 jobs:
   call-rg:

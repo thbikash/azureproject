@@ -1,4 +1,4 @@
-name: Deploy ARM Template
+name: Deploy VM ARM Template 
 
 on:
   workflow_dispatch:

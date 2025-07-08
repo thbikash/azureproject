@@ -1,4 +1,4 @@
-name: Deploy Chain AZ RG
+name: Deploy Chain AZ RG # This template is called by VM CHAIN create Template.
 
 on:
   workflow_call:

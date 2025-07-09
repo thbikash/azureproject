@@ -1,4 +1,4 @@
-{
+	{
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
@@ -76,7 +76,7 @@
     {
       "type": "Microsoft.Network/virtualNetworks",
       "apiVersion": "2021-02-01",
-      "name": "[concat(parameters('vmName'), '-vnet')]",
+      "name": "[concat(resourceGroup().name, '-vnet')]",
       "location": "[parameters('location')]",
       "dependsOn": [
         "[resourceId('Microsoft.Network/networkSecurityGroups', concat(parameters('vmName'), '-nsg'))]"
@@ -117,7 +117,7 @@
       "name": "[concat(parameters('vmName'), '-nic')]",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[resourceId('Microsoft.Network/virtualNetworks', concat(parameters('vmName'), '-vnet'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', concat(resourceGroup().name, '-vnet'))]",
         "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('vmName'), '-ip'))]"
       ],
       "properties": {
@@ -126,7 +126,7 @@
             "name": "ipconfig1",
             "properties": {
               "subnet": {
-                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(parameters('vmName'), '-vnet'), 'default')]"
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(resourceGroup().name, '-vnet'), 'default')]"
               },
               "publicIPAddress": {
                 "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('vmName'), '-ip'))]"

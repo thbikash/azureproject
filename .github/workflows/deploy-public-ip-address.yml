@@ -41,10 +41,10 @@ jobs:
         
     - name: Debug - Print Environment Variables
       run: |
-        echo "PUBLIC_IP_ADDRESS_NAME: ${{ github.event.inputs.storage_name }}"
-        echo "PUBLIC_IP_ADDRESSLOCATION: ${{ github.event.inputs.storage_location }}"
-        echo "PUBLIC_IP_ADDRESS_SKU: ${{ github.event.inputs.storage_sku }}"
-        echo "PUBLIC_IP_ADDRESS_ALLOCATION_METHOD: ${{ github.event.inputs.storage_sku }}"
+        echo "PUBLIC_IP_ADDRESS_NAME: ${{ github.event.inputs.public_ip_address_name }}"
+        echo "PUBLIC_IP_ADDRESSLOCATION: ${{ github.event.inputs.public_ip_address_location }}"
+        echo "PUBLIC_IP_ADDRESS_SKU: ${{ github.event.inputs.public_ip_address_sku }}"
+        echo "PUBLIC_IP_ADDRESS_ALLOCATION_METHOD: ${{ github.event.inputs.public_ip_address_allocation_method }}"
         echo "AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_CREDENTIALS }}"
         
     - name: Deploy Resource Group
@@ -55,7 +55,7 @@ jobs:
         template: ./LB/createPublicIpAddress.json # Path to your ARM template file
         parameters: > # Parameters for your ARM template
           name=${{ github.event.inputs.public_ip_address_name }}
-          location=${{ public_ip_address_location }}
-          SKU=${{ public_ip_address_sku }}
-          publicIPAllocationMethod=${{public_ip_address_allocation_method }}
+          location=${{ github.event.inputs.public_ip_address_location }}
+          SKU=${{ github.event.inputs.public_ip_address_sku }}
+          publicIPAllocationMethod=${{ github.event.inputs.public_ip_address_allocation_method }}
         failOnStdErr: true # Fail the workflow if there are errors in the deployment output    

@@ -1,0 +1,64 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "publicIPAddressName": 
+        {
+            "type": "String",
+            "metadata": {
+                "description": "Name of the PublicIPAddress to create."
+            }
+        },
+          "publicIPAddresslocation": 
+        {
+            "type": "String",
+            "metadata": {
+                "description": "Location of the PublicIPAddress to create."
+            }
+        },
+          "publicIPAddressSKU": 
+        {
+            "type": "String",
+            "metadata": {
+                "description": "SKU of the PublicIPAddress to create."
+            }
+        },
+          "publicIPAllocationMethod": 
+        {
+            "type": "String",
+            "metadata": {
+                "description": "Allocation Method of the PublicIPAddress."
+            }
+        },
+       
+      
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2024-05-01",
+            "name": "[parameters('publicIPAddressName')]",
+            "location": "[parameters('publicIPAddresslocation')]",
+            "sku": { 
+                    "name":"[parameters('publicIPAddressSKU')]",
+                    "tier": "Regional" 
+                    },
+            "properties": {
+                            "publicIPAllocationMethod": "[parameters('publicIPAllocationMethod')]"
+                         }       
+                       
+            },   
+
+            ],
+    "outputs":
+        {
+            "publicIPAddress":  {
+                "type": "string",
+                "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',parameters('publicIPAddressName'))).ipAddress]"
+    
+            }
+        }
+    }
+    
+

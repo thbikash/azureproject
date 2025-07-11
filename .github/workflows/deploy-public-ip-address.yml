@@ -54,8 +54,8 @@ jobs:
         resourceGroupName: ${{ github.event.inputs.resource_group }}
         template: ./LB/createPublicIpAddress.json # Path to your ARM template file
         parameters: > # Parameters for your ARM template
-          name=${{ github.event.inputs.public_ip_address_name }}
-          location=${{ github.event.inputs.public_ip_address_location }}
-          SKU=${{ github.event.inputs.public_ip_address_sku }}
+          publicIPAddressName=${{ github.event.inputs.public_ip_address_name }}
+          publicIPAddresslocation=${{ github.event.inputs.public_ip_address_location }}
+          publicIPAddressSKU=${{ github.event.inputs.public_ip_address_sku }}
           publicIPAllocationMethod=${{ github.event.inputs.public_ip_address_allocation_method }}
         failOnStdErr: true # Fail the workflow if there are errors in the deployment output    

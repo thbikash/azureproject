@@ -41,6 +41,6 @@ jobs:
         resourceGroupName: ${{ github.event.inputs.resource_group }}
         template: ./LB/createPublicLoadBalancer.json # Path to your ARM template file
         parameters: > # Parameters for your ARM template
-          public_ip_name=${{ github.event.inputs.public_ip_address_name }}
           public_lb_name=${{ github.event.inputs.public_load_balancer_name }}
+          public_ip_name=${{ github.event.inputs.public_ip_address_name }}
         failOnStdErr: true # Fail the workflow if there are errors in the deployment output    

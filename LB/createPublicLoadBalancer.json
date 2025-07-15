@@ -45,7 +45,7 @@
                         "name": "[variables('loadBalancingRuleName')]",
                         "properties": {
                             "frontendIPConfiguration": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('public_lb_name')), '/frontendIPConfigurations/',variables('frontendIPConfigName')]"
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('public_lb_name')), '/frontendIPConfigurations/',variables('frontendIPConfigName'))]"
                             },
                             "frontendPort": 80,
                             "backendPort": 80,

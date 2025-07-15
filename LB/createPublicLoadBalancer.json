@@ -18,11 +18,7 @@
         {
             "type": "Microsoft.Network/loadBalancers",
             "apiVersion": "2024-05-01",
-            "name": "[parameters('public_lb_name')]",
-            "location": "eastus",
-            "sku": {
-                "name": "Standard",
-                "tier": "Regional"
+            "name": "[parameters('public_lb_name')]"
             },
             "properties": {
                 "frontendIPConfigurations": [

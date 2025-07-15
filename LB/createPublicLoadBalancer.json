@@ -1,89 +1,87 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    "public_lb_name": {
-      "type": "String"
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "public_lb_name": {
+            "type": "String"
+        },
+        "public_ip_name": {
+            "type": "String"
+        }
     },
-    "public_ip_name": {
-      "type": "String"
-    }
-  },
-  "variables": {
-        "frontendIPConfigName": "[concat(parameters('public_lb_name'),'-lb-frontend')]"
-        "backendPoolName": "[concat(parameters('public_lb_name'),'-backend-pool')]"
+    "variables": {
+        "frontendIPConfigName": "[concat(parameters('public_lb_name'),'-lb-frontend')]",
+        "backendPoolName": "[concat(parameters('public_lb_name'),'-backend-pool')]",
         "loadBalancingRuleName": "[concat(parameters('public_lb_name'),'-loadbalancing-rule')]"
-      }
-
-  "resources": [
-    {
-      "type": "Microsoft.Network/loadBalancers",
-      "apiVersion": "2024-05-01",
-      "name": "[parameters(public_lb_name')]",
-      "location": "eastus",
-      "sku": {
-        "name": "Standard",
-        "tier": "Regional"
-      },
-      "properties": {
-        "frontendIPConfigurations": [
-          {
-            "name": "[variables('frontendIPConfigName')]",
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/loadBalancers",
+            "apiVersion": "2024-05-01",
+            "name": "[parameters(public_lb_name')]",
+            "location": "eastus",
+            "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+            },
             "properties": {
-              "publicIPAddress": {
-                "id": "[parameters('public_ip_name"')]"
-              }
+                "frontendIPConfigurations": [
+                    {
+                        "name": "[variables('frontendIPConfigName')]",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "[parameters('public_ip_name')]"
+                            }
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "[variables('backendPoolName')]"
+                    }
+                ],
+                "loadBalancingRules": [
+                    {
+                        "name": "[variables('loadBalancingRuleName')]",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('public_lb_name')), '/frontendIPConfigurations/',variables('frontendIPConfigName')]"
+                            },
+                            "frontendPort": 80,
+                            "backendPort": 80,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 4,
+                            "protocol": "Tcp",
+                            "enableTcpReset": false,
+                            "loadDistribution": "Default",
+                            "disableOutboundSnat": true,
+                            "backendAddressPool": {
+                                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('public_lb_name'), 'backendAddressPools')]"
+                            },
+                            "probe": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('public_lb_name')), '/probes/',variables('loadBalancingRules')]"
+                            }
+                        }
+                    }
+                ],
+                "probes": [
+                    {
+                        "name": "[variables('loadBalancingRules')]",
+                        "properties": {
+                            "protocol": "Http",
+                            "port": 80,
+                            "requestPath": "/",
+                            "intervalInSeconds": 5,
+                            "numberOfProbes": 3,
+                            "probeThreshold": 2,
+                            "noHealthyBackendsBehavior": "AllProbedDown"
+                        }
+                    }
+                ],
+                "inboundNatRules": [],
+                "outboundRules": [],
+                "inboundNatPools": []
             }
-          }
-        ],
-        "backendAddressPools": [
-          {
-            "name": "[variables('backendPoolName')]"
-          }
-        ],
-        "loadBalancingRules": [
-          {
-            "name": "[variables('loadBalancingRuleName')]",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('public_lb_name')), '/frontendIPConfigurations/',variables('frontendIPConfigName')]"
-              },
-              "frontendPort": 80,
-              "backendPort": 80,
-              "enableFloatingIP": false,
-              "idleTimeoutInMinutes": 4,
-              "protocol": "Tcp",
-              "enableTcpReset": false,
-              "loadDistribution": "Default",
-              "disableOutboundSnat": true,
-              "backendAddressPool": {
-                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('public_lb_name'), 'backendAddressPools')]"
-              },
-              "probe": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('public_lb_name')), '/probes/',variables('loadBalancingRules')]"
-              }
-            }
-          }
-        ],
-        "probes": [
-          {
-            "name": "[variables('loadBalancingRules')]",
-            "properties": {
-              "protocol": "Http",
-              "port": 80,
-              "requestPath": "/",
-              "intervalInSeconds": 5,
-              "numberOfProbes": 3,
-              "probeThreshold": 2,
-              "noHealthyBackendsBehavior": "AllProbedDown"
-            }
-          }
-        ],
-        "inboundNatRules": [],
-        "outboundRules": [],
-        "inboundNatPools": []
-      }
-    }
-  ]
+        }
+    ]
 }
-

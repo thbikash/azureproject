@@ -59,7 +59,7 @@
                                 "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('public_lb_name'), 'backendAddressPools')]"
                             },
                             "probe": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('public_lb_name')), '/probes/',variables('loadBalancingRules')]"
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('public_lb_name')), '/probes/',variables('loadBalancingRules'))]"
                             }
                         }
                     }

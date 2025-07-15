@@ -33,7 +33,7 @@
         ],
         "backendAddressPools": [
           {
-            "name": "trainingtest-backend-pool-vms",            
+            "name": "trainingtest-backend-pool-vms"
           }
         ],
         "loadBalancingRules": [

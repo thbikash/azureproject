@@ -33,27 +33,7 @@
         ],
         "backendAddressPools": [
           {
-            "name": "trainingtest-backend-pool-vms",
-            "properties": {
-              "loadBalancerBackendAddresses": [
-                {
-                  "name": "training1_trainin1vm2-nicipconfig1",
-                  "properties": {
-                    "networkInterfaceIPConfiguration": {
-                      "id": "/subscriptions/95f113f7-c06e-479d-a4f3-e070f3346c30/resourceGroups/training1/providers/Microsoft.Network/networkInterfaces/trainin1vm2-nic/ipConfigurations/ipconfig1"
-                    }
-                  }
-                },
-                {
-                  "name": "training1_training1vm1-nicipconfig1",
-                  "properties": {
-                    "networkInterfaceIPConfiguration": {
-                      "id": "/subscriptions/95f113f7-c06e-479d-a4f3-e070f3346c30/resourceGroups/training1/providers/Microsoft.Network/networkInterfaces/training1vm1-nic/ipConfigurations/ipconfig1"
-                    }
-                  }
-                }
-              ]
-            }
+            "name": "trainingtest-backend-pool-vms",            
           }
         ],
         "loadBalancingRules": [

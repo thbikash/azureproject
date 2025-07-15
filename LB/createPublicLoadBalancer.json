@@ -1,0 +1,104 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "loadBalancers_training1_public_lb_name": {
+      "type": "String"
+    },
+    "publicIPAddresses_training1_lb_public_ip_externalid": {
+      "type": "String"
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Network/loadBalancers",
+      "apiVersion": "2024-05-01",
+      "name": "[parameters('loadBalancers_training1_public_lb_name')]",
+      "location": "eastus",
+      "sku": {
+        "name": "Standard",
+        "tier": "Regional"
+      },
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "trainingtest-lb-frontend",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[parameters('publicIPAddresses_training1_lb_public_ip_externalid')]"
+              }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "trainingtest-backend-pool-vms",
+            "properties": {
+              "loadBalancerBackendAddresses": [
+                {
+                  "name": "training1_trainin1vm2-nicipconfig1",
+                  "properties": {
+                    "networkInterfaceIPConfiguration": {
+                      "id": "/subscriptions/95f113f7-c06e-479d-a4f3-e070f3346c30/resourceGroups/training1/providers/Microsoft.Network/networkInterfaces/trainin1vm2-nic/ipConfigurations/ipconfig1"
+                    }
+                  }
+                },
+                {
+                  "name": "training1_training1vm1-nicipconfig1",
+                  "properties": {
+                    "networkInterfaceIPConfiguration": {
+                      "id": "/subscriptions/95f113f7-c06e-479d-a4f3-e070f3346c30/resourceGroups/training1/providers/Microsoft.Network/networkInterfaces/training1vm1-nic/ipConfigurations/ipconfig1"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "name": "trainingtest-http-rule-nginx",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_training1_public_lb_name')), '/frontendIPConfigurations/trainingtest-lb-frontend')]"
+              },
+              "frontendPort": 80,
+              "backendPort": 80,
+              "enableFloatingIP": false,
+              "idleTimeoutInMinutes": 4,
+              "protocol": "Tcp",
+              "enableTcpReset": false,
+              "loadDistribution": "Default",
+              "disableOutboundSnat": true,
+              "backendAddressPool": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_training1_public_lb_name'), 'trainingtest-backend-pool-vms')]"
+              },
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_training1_public_lb_name')), '/probes/trainingtest-http-healthcheck-nginx')]"
+              }
+            }
+          }
+        ],
+        "probes": [
+          {
+            "name": "trainingtest-http-healthcheck-nginx",
+            "properties": {
+              "protocol": "Http",
+              "port": 80,
+              "requestPath": "/",
+              "intervalInSeconds": 5,
+              "numberOfProbes": 3,
+              "probeThreshold": 2,
+              "noHealthyBackendsBehavior": "AllProbedDown"
+            }
+          }
+        ],
+        "inboundNatRules": [],
+        "outboundRules": [],
+        "inboundNatPools": []
+      }
+    }
+  ]
+}
+

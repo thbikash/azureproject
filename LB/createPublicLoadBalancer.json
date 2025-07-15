@@ -2,19 +2,24 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "loadBalancers_training1_public_lb_name": {
+    "public_lb_name": {
       "type": "String"
     },
-    "publicIPAddresses_training1_lb_public_ip_externalid": {
+    "public_ip_name": {
       "type": "String"
     }
   },
-  "variables": {},
+  "variables": {
+        "frontendIPConfigName": "[concat(parameters('public_lb_name'),'-lb-frontend')]"
+        "backendPoolName": "[concat(parameters('public_lb_name'),'-backend-pool')]"
+        "loadBalancingRuleName": "[concat(parameters('public_lb_name'),'-loadbalancing-rule')]"
+      }
+
   "resources": [
     {
       "type": "Microsoft.Network/loadBalancers",
       "apiVersion": "2024-05-01",
-      "name": "[parameters('loadBalancers_training1_public_lb_name')]",
+      "name": "[parameters(public_lb_name')]",
       "location": "eastus",
       "sku": {
         "name": "Standard",
@@ -23,25 +28,25 @@
       "properties": {
         "frontendIPConfigurations": [
           {
-            "name": "trainingtest-lb-frontend",
+            "name": "[variables('frontendIPConfigName')]",
             "properties": {
               "publicIPAddress": {
-                "id": "[parameters('publicIPAddresses_training1_lb_public_ip_externalid')]"
+                "id": "[parameters('public_ip_name"')]"
               }
             }
           }
         ],
         "backendAddressPools": [
           {
-            "name": "trainingtest-backend-pool-vms"
+            "name": "[variables('backendPoolName')]"
           }
         ],
         "loadBalancingRules": [
           {
-            "name": "trainingtest-http-rule-nginx",
+            "name": "[variables('loadBalancingRuleName')]",
             "properties": {
               "frontendIPConfiguration": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_training1_public_lb_name')), '/frontendIPConfigurations/trainingtest-lb-frontend')]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('public_lb_name')), '/frontendIPConfigurations/',variables('frontendIPConfigName')]"
               },
               "frontendPort": 80,
               "backendPort": 80,
@@ -52,17 +57,17 @@
               "loadDistribution": "Default",
               "disableOutboundSnat": true,
               "backendAddressPool": {
-                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_training1_public_lb_name'), 'trainingtest-backend-pool-vms')]"
+                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('public_lb_name'), 'backendAddressPools')]"
               },
               "probe": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_training1_public_lb_name')), '/probes/trainingtest-http-healthcheck-nginx')]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('public_lb_name')), '/probes/',variables('loadBalancingRules')]"
               }
             }
           }
         ],
         "probes": [
           {
-            "name": "trainingtest-http-healthcheck-nginx",
+            "name": "[variables('loadBalancingRules')]",
             "properties": {
               "protocol": "Http",
               "port": 80,

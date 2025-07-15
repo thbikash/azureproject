@@ -56,10 +56,10 @@
                             "loadDistribution": "Default",
                             "disableOutboundSnat": true,
                             "backendAddressPool": {
-                                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('public_lb_name'), 'backendAddressPools')]"
+                                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('public_lb_name'), 'backendPoolName')]"
                             },
                             "probe": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('public_lb_name')), '/probes/',variables('loadBalancingRules'))]"
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('public_lb_name')), '/probes/',variables('loadBalancingRuleName'))]"
                             }
                         }
                     }

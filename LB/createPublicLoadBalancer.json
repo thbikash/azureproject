@@ -20,6 +20,10 @@
             "apiVersion": "2024-05-01",
             "name": "[parameters('public_lb_name')]",
             "location": "[resourceGroup().location]",
+              "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+            },
             "properties": {
                 "frontendIPConfigurations": [
                     {

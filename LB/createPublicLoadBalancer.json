@@ -54,14 +54,14 @@
                                 "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('public_lb_name'), 'backendAddressPools')]"
                             },
                             "probe": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('public_lb_name')), '/probes/',variables('loadBalancingRules'))]"
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('public_lb_name')), '/probes/',variables('loadBalancingRuleName'))]"
                             }
                         }
                     }
                 ],
                 "probes": [
                     {
-                        "name": "[variables('loadBalancingRules')]",
+                        "name": "[variables('loadBalancingRuleName')]",
                         "properties": {
                             "protocol": "Http",
                             "port": 80,

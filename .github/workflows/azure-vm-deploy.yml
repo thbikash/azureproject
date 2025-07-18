@@ -30,11 +30,11 @@ jobs:
           operation: 'create' # Specify the deployment operation for creating/updating
           scope: 'resourceGroup' # Correct camelCase for resource group scope
 
-          # --- ABSOLUTELY REQUIRED: Add the subscription-id input here ---
-          # THIS LINE MUST BE PRESENT AND CORRECTLY INDENTED.
+          # --- THIS LINE IS ABSOLUTELY ESSENTIAL AND MUST BE PRESENT AND INDENTED CORRECTLY ---
+          # We will use the secret directly, as it's the most straightforward path.
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
           resource-group-name: RG-WebApplication # Your target Azure Resource Group
           template-file: ./VM/azuredeploycustomconfiguration.bicep # Path to your Bicep template
           parameters-file: ./VM/azuredeploycustomconfiguration.parameters.json # Path to your JSON parameter file
-          parameters: '{"adminPassword": "${{ secrets.VM_ADMIN_PASSWORD }}"}' # Inline override for the secret passwords
+          parameters: '{"adminPassword": "${{ secrets.VM_ADMIN_PASSWORD }}"}' # Inline override for the secret password

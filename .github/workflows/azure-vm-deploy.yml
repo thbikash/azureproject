@@ -29,18 +29,12 @@ jobs:
           resource-group-name: RG-WebApplication # Your target Azure Resource Group
           template-file: ./VM/azuredeploycustomconfiguration.bicep # Path to your Bicep template
 
-          # --- CORRECTED 'parameters' INPUT ---
-          # Combine parameters from file and inline overrides.
-          # The action will merge them, with inline values taking precedence.
-          # Format it as a multi-line string for clarity and to easily combine.
-          parameters: |
-            @./VM/azuredeploycustomconfiguration.parameters.json # Reference the parameter file
-            adminPassword=${{ secrets.VM_ADMIN_PASSWORD }} # Override password from GitHub Secret
-            # Example of another inline override if needed:
-            # vmName=myNewVMFromGHAction
+          # --- CORRECTED: Use 'parameters-file' for the JSON file ---
+          parameters-file: ./VM/azuredeploycustomconfiguration.parameters.json
+
+          # --- CORRECTED: Use 'parameters' ONLY for inline JSON overrides ---
+          # This must be a single-line valid JSON string.
+          parameters: '{"adminPassword": "${{ secrets.VM_ADMIN_PASSWORD }}"}'
 
           # --- REMOVED: 'additional-arguments' is NOT a valid input for this action ---
-          # If you need --debug for the underlying AZ CLI command, it's not exposed
-          # directly by this action as an input. You'd typically rely on the action's
-          # internal logging.
-          # additional-arguments: --debug # This line should be completely removed
+          # (It was already removed in the previous attempt, but just confirming it's absent here)

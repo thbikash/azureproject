@@ -23,14 +23,16 @@ jobs:
         run: ls -l VM/
 
       - name: Deploy Azure VM using Bicep and Parameter File
-        uses: azure/arm-deploy@v3 # CORRECTED: Using v3 as v4 does not exist
+        # --- RECOMMENDED: Switch to the dedicated bicep-deploy action ---
+        uses: azure/bicep-deploy@v1 # Use the bicep-deploy action (currently v1 is stable)
         with:
           resourceGroupName: RG-WebApplication # Your target Azure Resource Group
-          template: ./VM/azuredeploycustomconfiguration.bicep # Path to your Bicep template
+          templateFile: ./VM/azuredeploycustomconfiguration.bicep # Path to your Bicep template
           # Use a multi-line string for parameters to combine file and overrides
           parameters: |
             ./VM/azuredeploycustomconfiguration.parameters.json
             adminPassword=${{ secrets.VM_ADMIN_PASSWORD }} # Override password from GitHub Secret
-          failOnStdErr: true # Fail the workflow step if any stderr output occurs
-        env:
-          AZURE_CLI_DEBUG: true # Enable debug logging for Azure CLI commands within this step
+          # The bicep-deploy action does not have a 'failOnStdErr' input directly.
+          # It manages failure based on the deployment result.
+          # 'additionalArguments' can be used for things like --debug or --what-if
+          additionalArguments: --debug # Enable debug logging for Azure CLI commands within this step

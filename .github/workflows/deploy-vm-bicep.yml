@@ -40,13 +40,13 @@ jobs:
           template: ./VM/azuredeploycustomconfiguration.bicep
           parameters: |
             {
-              "vmName": {
-                "value": "${{ github.event.inputs.vmName }}"
-              },
-              "adminUsername": {
-                "value": "${{ github.event.inputs.adminUsername }}"
-              },
-              "adminPassword": {
-                "value": "${{ github.event.inputs.adminPassword }}"
-              }
+            "vmName": {
+              "value": "${{ github.event.inputs.vmName }}"
+            },
+            "adminUsername": {
+              "value": "${{ github.event.inputs.adminUsername }}"
+            },
+            "adminPassword": {
+              "value": "${{ secrets.VM_ADMIN_PASSWORD }}"
             }
+            }            

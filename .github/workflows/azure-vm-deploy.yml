@@ -1,4 +1,4 @@
-name: New Azure VM Bicep Deployment
+name: Azure VM Bicep Deployment
 
 on:
   push:
@@ -18,33 +18,19 @@ jobs:
         uses: azure/login@v2 # Authenticate to Azure
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }} # Your Azure Service Principal credentials
-          # Other options if needed:
-          # enable-AzPSSession: false
-          # environment: azurecloud
-          # allow-no-subscriptions: false
-          # auth-type: SERVICE_PRINCIPAL # Default, can be omitted
-
-      # Optional: Re-install specific Azure CLI version if absolutely necessary,
-      # but generally, the pre-installed version on the runner is sufficient
-      # unless you have a very specific version requirement or encounter issues.
-      # - name: Ensure specific Azure CLI version (Optional)
-      #   run: |
-      #     sudo apt-get remove -y azure-cli || true
-      #     python3 -m pip install --upgrade pip
-      #     python3 -m pip install --force-reinstall azure-cli==2.75.0 azure-cli-core==2.75.0
-      #     az --version # Verify installation
 
       - name: Debug - List Files in VM directory (Optional, for troubleshooting)
         run: ls -l VM/
 
       - name: Deploy Azure VM using Bicep and Parameter File
-        uses: azure/arm-deploy@v3 # <--- CHANGE THIS LINE FROM v4 TO v3
-              with:
-                resourceGroupName: RG-WebApplication
-                template: ./VM/azuredeploycustomconfiguration.bicep
-                parameters: |
-                  ./VM/azuredeploycustomconfiguration.parameters.json
-                  adminPassword=${{ secrets.VM_ADMIN_PASSWORD }}
-                failOnStdErr: true
-              env:
-                AZURE_CLI_DEBUG: true
+        uses: azure/arm-deploy@v3 # CORRECTED: Using v3 as v4 does not exist
+        with:
+          resourceGroupName: RG-WebApplication # Your target Azure Resource Group
+          template: ./VM/azuredeploycustomconfiguration.bicep # Path to your Bicep template
+          # Use a multi-line string for parameters to combine file and overrides
+          parameters: |
+            ./VM/azuredeploycustomconfiguration.parameters.json
+            adminPassword=${{ secrets.VM_ADMIN_PASSWORD }} # Override password from GitHub Secret
+          failOnStdErr: true # Fail the workflow step if any stderr output occurs
+        env:
+          AZURE_CLI_DEBUG: true # Enable debug logging for Azure CLI commands within this step

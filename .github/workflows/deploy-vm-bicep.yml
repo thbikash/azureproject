@@ -32,14 +32,13 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: 🚀 Deploy ARM Template
+      - name: 🚀 Deploy Bicep Template
         uses: azure/arm-deploy@v1
         with:
           subscriptionId: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
           resourceGroupName: ${{ github.event.inputs.resourceGroup }}
           template: ./VM/azuredeploycustomconfiguration.bicep
-          parameters: >
+          parameters: |
             vmName=${{ github.event.inputs.vmName }}
             adminUsername=${{ github.event.inputs.adminUsername }}
             adminPassword=${{ github.event.inputs.adminPassword }}
-          

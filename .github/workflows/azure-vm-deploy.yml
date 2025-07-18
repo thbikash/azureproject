@@ -38,14 +38,13 @@ jobs:
         run: ls -l VM/
 
       - name: Deploy Azure VM using Bicep and Parameter File
-        uses: azure/arm-deploy@v4 # Recommended: Use the latest stable version
-        with:
-          resourceGroupName: RG-WebApplication # Your target Azure Resource Group
-          template: ./VM/azuredeploycustomconfiguration.bicep # Path to your Bicep template
-          # Use a multi-line string for parameters to combine file and overrides
-          parameters: |
-            ./VM/azuredeploycustomconfiguration.parameters.json
-            adminPassword=${{ secrets.VM_ADMIN_PASSWORD }} # Override password from GitHub Secret
-          failOnStdErr: true # Fail the workflow step if any stderr output occurs
-        env:
-          AZURE_CLI_DEBUG: true # Enable debug logging for Azure CLI commands within this step
+        uses: azure/arm-deploy@v3 # <--- CHANGE THIS LINE FROM v4 TO v3
+              with:
+                resourceGroupName: RG-WebApplication
+                template: ./VM/azuredeploycustomconfiguration.bicep
+                parameters: |
+                  ./VM/azuredeploycustomconfiguration.parameters.json
+                  adminPassword=${{ secrets.VM_ADMIN_PASSWORD }}
+                failOnStdErr: true
+              env:
+                AZURE_CLI_DEBUG: true

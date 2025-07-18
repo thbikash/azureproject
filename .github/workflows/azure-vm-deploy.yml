@@ -27,11 +27,11 @@ jobs:
         with:
           type: 'deployment' # Specifies a standard ARM/Bicep deployment
           operation: 'create' # Specify the deployment operation for creating/updating
-
-          # --- CORRECTED: 'scope' must be 'resourceGroup' (camelCase) ---
           scope: 'resourceGroup' # Specify the scope of the deployment
 
-          # Assuming AZURE_SUBSCRIPTION_ID secret is set up as discussed
+          # --- CRITICAL CORRECTION: Ensure subscription-id is correctly provided ---
+          # Make absolutely certain that a secret named AZURE_SUBSCRIPTION_ID exists
+          # in your GitHub repository's secrets with the correct GUID value.
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
           resource-group-name: RG-WebApplication # Your target Azure Resource Group

@@ -29,7 +29,7 @@ jobs:
           operation: 'create' # Specify the deployment operation for creating/updating
 
           # --- ADDED: The required 'scope' input ---
-          scope: 'resourcegroup' # Specify the scope of the deployment
+          scope: 'resourceGroup' # Specify the scope of the deployment
 
           resource-group-name: RG-WebApplication # Your target Azure Resource Group
           template-file: ./VM/azuredeploycustomconfiguration.bicep # Path to your Bicep template

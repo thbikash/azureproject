@@ -1,0 +1,45 @@
+name: Deploy VM Bicep Template
+
+on:
+  workflow_dispatch:
+    inputs:
+      vmName:
+        description: 'Name of the Virtual Machine'
+        required: true
+        default: 'trainingvm'
+      adminUsername:
+        description: 'Admin username for the VM'
+        required: true
+        default: 'azureuser'
+      adminPassword:
+        description: 'Admin password for the VM'
+        required: true
+      resourceGroup:
+        description: 'Resource Group for the VM'
+        required: true        
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: manual-approval  # optional: only needed if you want review
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🔐 Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: 🚀 Deploy ARM Template
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
+          resourceGroupName: ${{ github.event.inputs.resourceGroup }}
+          template: ./VM/azuredeploycustomconfiguration.bicep
+          parameters: >
+            vmName=${{ github.event.inputs.vmName }}
+            adminUsername=${{ github.event.inputs.adminUsername }}
+            adminPassword=${{ github.event.inputs.adminPassword }}
+          

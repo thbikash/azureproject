@@ -15,6 +15,7 @@ jobs:
         uses: actions/checkout@v4 # Use v4 for the latest features and security fixes
 
       - name: Azure Login
+        id: az_login # <--- ADD AN ID HERE to reference its outputs
         uses: azure/login@v2 # Authenticate to Azure
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }} # Your Azure Service Principal credentials
@@ -29,10 +30,9 @@ jobs:
           operation: 'create' # Specify the deployment operation for creating/updating
           scope: 'resourceGroup' # Specify the scope of the deployment
 
-          # --- CRITICAL CORRECTION: Ensure subscription-id is correctly provided ---
-          # Make absolutely certain that a secret named AZURE_SUBSCRIPTION_ID exists
-          # in your GitHub repository's secrets with the correct GUID value.
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          # --- CRITICAL CORRECTION: Get subscription-id from the azure/login output ---
+          # The azure/login action (v2 and higher) outputs 'subscriptionId'
+          subscription-id: ${{ steps.az_login.outputs.subscriptionId }}
 
           resource-group-name: RG-WebApplication # Your target Azure Resource Group
           template-file: ./VM/azuredeploycustomconfiguration.bicep # Path to your Bicep template

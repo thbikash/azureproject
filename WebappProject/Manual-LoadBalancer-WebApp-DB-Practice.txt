@@ -1,0 +1,257 @@
+Step 1: Create Resource Group.
+
+Resource-Group >> RG-WebApplication
+location >> east-us
+
+az group create --name RG-WebApplication --location eastus
+
+
+Step 2: Create Virtual Network.
+
+virtual-network >> VNet-WebApplication
+
+az network vnet create --resource-group RG-WebApplication --name VNet-WebApplication
+
+Step 3: Create Subnets AppSubnet and DBSubnet under Virtual Network created in step 2.
+
+AppSubnet
+=========
+az network vnet subnet create --name AppSubnet --resource-group RG-WebApplication --vnet-name VNet-WebApplication --address-prefixes 10.0.1.0/24
+
+DBSubnet
+========
+az network vnet subnet create --name DBSubnet --resource-group RG-WebApplication --vnet-name VNet-WebApplication --address-prefixes 10.0.2.0/24
+
+Step 4: Create NSGs.
+
+AppNSG
+=======
+
+az network nsg create --name AppNSG --resource-group RG-WebApplication
+
+az network nsg rule create --resource-group RG-WebApplication --nsg-name AppNSG --name AllowHTTP --protocol Tcp --direction Inbound --priority 100 --source-address-prefixes Internet --source-port-ranges '*' --destination-port-ranges 80 --access Allow
+
+az network nsg rule create --resource-group RG-WebApplication --nsg-name AppNSG --name AllowSSH --protocol Tcp --direction Inbound --priority 110 --source-address-prefixes '*'  --source-port-ranges '*' --destination-port-ranges 22 --access Allow
+
+DBNSG
+=======
+
+az network nsg create --name DBNSG --resource-group RG-WebApplication
+
+az network nsg rule create --resource-group RG-WebApplication --nsg-name DBNSG --name AllowPostgresDBfromWebApp --protocol Tcp --direction Inbound --priority 100 --source-address-prefixes 10.0.1.0/24 --source-port-ranges '*' --destination-port-ranges 5432 --access Allow
+
+az network nsg rule create --resource-group RG-WebApplication --nsg-name AppNSG --name AllowSSH --protocol Tcp --direction Inbound --priority 110 --source-address-prefixes '*'  --source-port-ranges '*' --destination-port-ranges 22 --access Allow
+
+
+Step 5: Assosciate NSGs create in Step 4 with VNET created in Step 2.
+
+
+AppNSG >> VNet-WebApplication
+================================
+az network vnet subnet update --vnet-name VNet-WebApplication --name AppSubnet --resource-group RG-WebApplication --network-security-group AppNSG
+
+DBNSG >> VNet-WebApplication
+===============================
+az network vnet subnet update --vnet-name VNet-WebApplication --name DBSubnet --resource-group RG-WebApplication --network-security-group DBNSG
+
+Step 6: Deploy App-VM1 (This VM will have Flask app installed and also use for jump host to access the DB-VM later)
+
+Create VM
+===========
+az vm create --resource-group RG-WebApplication --name App-VM1--image Ubuntu2204 --size Standard_B1s --vnet-name VNet-WebApplication --subnet AppSubnet --admin-username azureuser --generate-ssh-keys --nsg AppNSG --public-ip-sku Standard 
+
+
+Step 7: Deploy DB-VM (This VM will have PostgreSQL with NO PUBLIC IP as it is DB server)
+
+
+Create VM
+==========
+az vm create --resource-group RG-WebApplication --name DB-VM --image Ubuntu2204 --size Standard_B1s --vnet-name VNet-WebApplication --subnet DBSubnet --admin-username dbuser --generate-ssh-keys --nsg DBNSG--public-ip-address ""
+
+Install PostgreSQL DB
+=====================
+
+Go to Azure Portal > DB-VM > Help > Reset Password > Add SSH Public Key (Choose Use existing Public Key) and the paste content of id_rsa_pub of App-VM1 into SSH Public Key and update. This will allow you to do SSH as below:
+
+ssh azureuser@<<PRIVATE-IP>>
+
+sudo apt update
+sudo apt install postgresql -y
+sudo -i -u postgres
+psql
+CREATE DATABASE azuredb;
+CREATE USER dbadmin WITH PASSWORD 'StrongP@ssw0rd';
+GRANT ALL PRIVILEGES ON DATABASE azuredb TO dbadmin;
+\q
+exit
+
+Edit configuration to allow private access:
+=================================================
+
+sudo nano /etc/postgresql/*/main/postgresql.conf
+# Change: listen_addresses = '*'
+
+enable network access:
+========================
+sudo nano /etc/postgresql/*/main/pg_hba.conf
+# Add: host all all 10.0.1.0/24 md5
+
+exit
+
+sudo systemctl restart postgresql
+
+Step 8: Deploy Flask App on App-VM1
+
+Install python3 and flask app
+=================================
+sudo apt update
+sudo apt install python3-pip -y
+sudo pip3 install flask psycopg2-binary  # ✅ Required fix
+
+# Create the app
+=================
+cat <<EOF > app.py
+from flask import Flask
+import psycopg2
+app = Flask(__name__)
+@app.route('/')
+def home():
+    try:
+        conn = psycopg2.connect(
+            host="10.0.2.4",
+            database="azuredb",
+            user="dbadmin",
+            password="StrongP@ssw0rd"
+        )
+        cur = conn.cursor()
+        cur.execute("SELECT NOW();")
+        result = cur.fetchone()
+        cur.close()
+        conn.close()
+        return f"<h1>Connected to DB!</h1><p>DB Time: {result[0]}</p>"
+    except Exception as e:
+        return f"<h1>Connection Failed</h1><p>{e}</p>"
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=80)
+EOF
+
+Run Flask app on port 80 (requires sudo):
+=================================================
+
+sudo python3 app.py > flask.log 2>&1 &
+
+
+check the logs if flask is started and listening on port 80:
+============================================================
+azureuser@App-VM1:~$ tail -f flask.log
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:80
+ * Running on http://10.0.1.4:80
+Press CTRL+C to quit
+
+Step 9: Access App in Browser
+================================
+Open your browser and visit:
+
+http://<App-VM1_Public_IP>
+
+You should see:
+Connected to DB! with the current timestamp
+
+**************************************************************************************************************************************
+	This completes the creation of Single App > DB. Now below steps will create LoadBalancer > Multiple App Server > DB.
+**************************************************************************************************************************************
+
+Step 10: Create a Public Load Balancer with Frontend IP and Backend Pool
+
+Create a public IP for the LB
+=====================================
+az network public-ip create --resource-group RG-WebApplication --name WebApplication-LB-PublicIP --sku Standard --allocation-method Static
+
+Create the Load Balancer
+===================================
+az network lb create --resource-group RG-WebApplication --name WebApplication-LB --public-ip-address WebApplication-LB-PublicIP --frontend-ip-name LBFrontEnd --backend-pool-name WebApplicationBackendPool
+
+Step 11: Create Health Probe and Load Balancer Rule
+
+Create a health probe on port 80
+======================================
+az network lb probe create --resource-group RG-WebApplication --lb-name WebApplication-LB --name httpProbe --protocol tcp--port 80
+
+Create LB rule to forward port 80 to backend pool on port 80
+================================================================
+
+az network lb rule create --resource-group RG-WebApplication --lb-name WebApplication-LB --name httpRule --protocol tcp --frontend-port 80 --backend-port 80 --frontend-ip-name LBFrontEnd --backend-pool-name WebApplicationBackendPool --probe-name httpProbe
+
+
+Step 12: Create App-VM1 and Join to Backend Pool
+
+az vm create --resource-group RG-WebApplication --name App-VM2 --image Ubuntu2204 --size Standard_B1s --vnet-name VNet-WebApplication --subnet AppSubnet --admin-username azureuser --generate-ssh-keys --nsg AppNSG 
+
+
+Step 13: Attach NIC of WebVM1 & WebVM2 to Load Balancer Backend Pool
+
+List NIC details attached to VM
+====================================
+
+bikash@bikash-OptiPlex-5050:~$ az network nic list --resource-group RG-WebApplication --query "[].{Name:name, VM:id}" -o table
+Name          VM
+------------  -----------------------------------------------------------------------------------------------------------------------------------------------
+App-VM1VMNic  /subscriptions/95f113f7-c06e-479d-a4f3-e070f3346c30/resourceGroups/RG-WebApplication/providers/Microsoft.Network/networkInterfaces/App-VM1VMNic
+App-VM2VMNic  /subscriptions/95f113f7-c06e-479d-a4f3-e070f3346c30/resourceGroups/RG-WebApplication/providers/Microsoft.Network/networkInterfaces/App-VM2VMNic
+DB-VMVMNic    /subscriptions/95f113f7-c06e-479d-a4f3-e070f3346c30/resourceGroups/RG-WebApplication/providers/Microsoft.Network/networkInterfaces/DB-VMVMNic
+
+
+List IPConfiguration attached to NIC
+=========================================
+
+az network nic list --resource-group RG-WebApplication --query "[].{NIC:name, IPConfigs:ipConfigurations[].name}" -o json
+
+bikash@bikash-OptiPlex-5050:~$ az network nic list --resource-group RG-WebApplication --query "[].{NIC:name, IPConfigs:ipConfigurations[].name}" -o json
+[
+  {
+    "IPConfigs": [
+      "ipconfigApp-VM1"
+    ],
+    "NIC": "App-VM1VMNic"
+  },
+  {
+    "IPConfigs": [
+      "ipconfigApp-VM2"
+    ],
+    "NIC": "App-VM2VMNic"
+  },
+  {
+    "IPConfigs": [
+      "ipconfigDB-VM"
+    ],
+    "NIC": "DB-VMVMNic"
+  }
+]
+
+Attach NIC to LB Backend pool (use NicName and ipconfig name from above listing in below commands)
+===================================================================================================
+
+az network nic ip-config update --resource-group RG-WebApplication --nic-name App-VM1VMNic --name ipconfigApp-VM1 --lb-name WebApplication-LB --lb-address-pools WebApplicationBackendPool
+
+az network nic ip-config update --resource-group RG-WebApplication --nic-name App-VM2VMNic --name ipconfigApp-VM2 --lb-name WebApplication-LB --lb-address-pools WebApplicationBackendPool
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

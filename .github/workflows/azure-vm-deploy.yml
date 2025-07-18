@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4 # Use v4 for the latest features and security fixes
 
       - name: Azure Login
-        id: az_login # <--- ADD AN ID HERE to reference its outputs
+        id: az_login # Keep ID for potential future use or debugging outputs
         uses: azure/login@v2 # Authenticate to Azure
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }} # Your Azure Service Principal credentials
@@ -28,11 +28,11 @@ jobs:
         with:
           type: 'deployment' # Specifies a standard ARM/Bicep deployment
           operation: 'create' # Specify the deployment operation for creating/updating
-          scope: 'resourceGroup' # Specify the scope of the deployment
+          scope: 'resourceGroup' # Correct camelCase for resource group scope
 
-          # --- CRITICAL CORRECTION: Get subscription-id from the azure/login output ---
-          # The azure/login action (v2 and higher) outputs 'subscriptionId'
-          subscription-id: ${{ steps.az_login.outputs.subscriptionId }}
+          # --- ABSOLUTELY REQUIRED: Add the subscription-id input here ---
+          # THIS LINE MUST BE PRESENT AND CORRECTLY INDENTED.
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
           resource-group-name: RG-WebApplication # Your target Azure Resource Group
           template-file: ./VM/azuredeploycustomconfiguration.bicep # Path to your Bicep template

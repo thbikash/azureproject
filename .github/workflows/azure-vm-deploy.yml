@@ -25,11 +25,22 @@ jobs:
       - name: Deploy Azure VM using Bicep and Parameter File
         uses: azure/bicep-deploy@v1 # Using the dedicated bicep-deploy action (v1)
         with:
-          # --- CORRECTED: 'type' must be 'deployment' for a standard ARM/Bicep deployment ---
           type: 'deployment' # Specifies a standard ARM/Bicep deployment
-
           resource-group-name: RG-WebApplication # Your target Azure Resource Group
           template-file: ./VM/azuredeploycustomconfiguration.bicep # Path to your Bicep template
-          parameters-file: ./VM/azuredeploycustomconfiguration.parameters.json # Path to your JSON parameter file
-          parameters: adminPassword=${{ secrets.VM_ADMIN_PASSWORD }} # Inline override for the secret password
-          additional-arguments: --debug # Enable debug logging for Azure CLI commands within this step
+
+          # --- CORRECTED 'parameters' INPUT ---
+          # Combine parameters from file and inline overrides.
+          # The action will merge them, with inline values taking precedence.
+          # Format it as a multi-line string for clarity and to easily combine.
+          parameters: |
+            @./VM/azuredeploycustomconfiguration.parameters.json # Reference the parameter file
+            adminPassword=${{ secrets.VM_ADMIN_PASSWORD }} # Override password from GitHub Secret
+            # Example of another inline override if needed:
+            # vmName=myNewVMFromGHAction
+
+          # --- REMOVED: 'additional-arguments' is NOT a valid input for this action ---
+          # If you need --debug for the underlying AZ CLI command, it's not exposed
+          # directly by this action as an input. You'd typically rely on the action's
+          # internal logging.
+          # additional-arguments: --debug # This line should be completely removed

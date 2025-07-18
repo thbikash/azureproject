@@ -28,12 +28,28 @@ jobs:
         uses: actions/checkout@v3
 
       - name: 🔐 Azure Login
-        uses: azure/login@v2
+        uses: azure/login@v2 # Use v2 for azure/login as well for consistency and latest features
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: 🚀 Deploy ARM Template
-        uses: azure/arm-deploy@v2
+      - name: Install specific Azure CLI version (2.75.0)
+        run: |
+          # Uninstall any existing Azure CLI to ensure a clean install
+          sudo apt-get remove -y azure-cli || true
+          
+          # Install the specific version via pip, which allows version pinning
+          # Ensure pip is up to date
+          pip install --upgrade pip
+          
+          # Install Azure CLI 2.75.0
+          pip install azure-cli==2.75.0
+          
+          # Verify the installed version
+          az --version
+        shell: bash
+
+      - name: 🚀 Deploy Bicep Template
+        uses: azure/arm-deploy@v2 # Ensure this is also v2
         with:
           subscriptionId: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
           resourceGroupName: ${{ github.event.inputs.resourceGroup }}
@@ -42,4 +58,7 @@ jobs:
             vmName=${{ github.event.inputs.vmName }}
             adminUsername=${{ github.event.inputs.adminUsername }}
             adminPassword=${{ github.event.inputs.adminPassword }}
-          
+          # You can remove 'failOnStdErr: true' for now if it's not critical,
+          # to see if the core deployment succeeds. If the deployment fails,
+          # it will still be marked as a failed job.
+          # failOnStdErr: true

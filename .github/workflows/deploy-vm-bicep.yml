@@ -11,6 +11,9 @@ on:
         description: 'Admin username for the VM'
         required: true
         default: 'azureuser'
+      adminPassword:
+        description: 'Admin password for the VM'
+        required: true
       resourceGroup:
         description: 'Resource Group for the VM'
         required: true        
@@ -19,7 +22,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment:
-      name: manual-approval
+      name: manual-approval  # optional: only needed if you want review
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v3
@@ -29,21 +32,14 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: 🚀 Deploy Bicep Template
+      - name: 🚀 Deploy ARM Template
         uses: azure/arm-deploy@v1
         with:
           subscriptionId: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
           resourceGroupName: ${{ github.event.inputs.resourceGroup }}
           template: ./VM/azuredeploycustomconfiguration.bicep
-          parameters: |
-            {
-              "vmName": {
-                "value": "${{ github.event.inputs.vmName }}"
-              },
-              "adminUsername": {
-                "value": "${{ github.event.inputs.adminUsername }}"
-              },
-              "adminPassword": {
-                "value": "${{ secrets.VM_ADMIN_PASSWORD }}"
-              }
-            }
+          parameters: >
+            vmName=${{ github.event.inputs.vmName }}
+            adminUsername=${{ github.event.inputs.adminUsername }}
+            adminPassword=${{ github.event.inputs.adminPassword }}
+          

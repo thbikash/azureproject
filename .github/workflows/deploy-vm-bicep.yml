@@ -22,34 +22,34 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment:
-      name: manual-approval  # optional: only needed if you want review
+      name: manual-approval
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v3
 
       - name: 🔐 Azure Login
-        uses: azure/login@v2 # Use v2 for azure/login as well for consistency and latest features
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Install specific Azure CLI version (2.75.0)
+      - name: Install specific Azure CLI version (2.75.0) and dependencies
         run: |
           # Uninstall any existing Azure CLI to ensure a clean install
           sudo apt-get remove -y azure-cli || true
           
-          # Install the specific version via pip, which allows version pinning
           # Ensure pip is up to date
-          pip install --upgrade pip
+          python3 -m pip install --upgrade pip
           
-          # Install Azure CLI 2.75.0
-          pip install azure-cli==2.75.0
+          # Install the specific version of azure-cli and its core components
+          # Using --force-reinstall to ensure a fresh, complete installation
+          python3 -m pip install --force-reinstall azure-cli==2.75.0 azure-cli-core==2.75.0
           
           # Verify the installed version
           az --version
         shell: bash
 
       - name: 🚀 Deploy Bicep Template
-        uses: azure/arm-deploy@v2 # Ensure this is also v2
+        uses: azure/arm-deploy@v2
         with:
           subscriptionId: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
           resourceGroupName: ${{ github.event.inputs.resourceGroup }}
@@ -58,7 +58,4 @@ jobs:
             vmName=${{ github.event.inputs.vmName }}
             adminUsername=${{ github.event.inputs.adminUsername }}
             adminPassword=${{ github.event.inputs.adminPassword }}
-          # You can remove 'failOnStdErr: true' for now if it's not critical,
-          # to see if the core deployment succeeds. If the deployment fails,
-          # it will still be marked as a failed job.
-          # failOnStdErr: true
+          failOnStdErr: true # Keep this for proper error detection

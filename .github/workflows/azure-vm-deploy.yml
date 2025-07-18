@@ -23,16 +23,23 @@ jobs:
         run: ls -l VM/
 
       - name: Deploy Azure VM using Bicep and Parameter File
-        # --- RECOMMENDED: Switch to the dedicated bicep-deploy action ---
-        uses: azure/bicep-deploy@v1 # Use the bicep-deploy action (currently v1 is stable)
+        uses: azure/bicep-deploy@v1 # Using the dedicated bicep-deploy action (v1)
         with:
-          resourceGroupName: RG-WebApplication # Your target Azure Resource Group
-          templateFile: ./VM/azuredeploycustomconfiguration.bicep # Path to your Bicep template
-          # Use a multi-line string for parameters to combine file and overrides
-          parameters: |
-            ./VM/azuredeploycustomconfiguration.parameters.json
-            adminPassword=${{ secrets.VM_ADMIN_PASSWORD }} # Override password from GitHub Secret
-          # The bicep-deploy action does not have a 'failOnStdErr' input directly.
-          # It manages failure based on the deployment result.
-          # 'additionalArguments' can be used for things like --debug or --what-if
-          additionalArguments: --debug # Enable debug logging for Azure CLI commands within this step
+          # --- REQUIRED: Specify the type of deployment (e.g., 'Resource Group') ---
+          type: 'Resource Group' # This tells the action the scope of your deployment
+
+          # --- Use 'resource-group-name' instead of 'resourceGroupName' ---
+          resource-group-name: RG-WebApplication # Your target Azure Resource Group
+
+          # --- 'template-file' is correct for the Bicep template path ---
+          template-file: ./VM/azuredeploycustomconfiguration.bicep # Path to your Bicep template
+
+          # --- Use 'parameters-file' for the parameter file and 'parameters' for overrides ---
+          parameters-file: ./VM/azuredeploycustomconfiguration.parameters.json # Path to your JSON parameter file
+          parameters: adminPassword=${{ secrets.VM_ADMIN_PASSWORD }} # Inline override for the secret password
+
+          # --- For additional arguments like '--debug', use 'additional-arguments' ---
+          additional-arguments: --debug # Enable debug logging for Azure CLI commands within this step
+
+          # 'failOnStdErr' is not an input for bicep-deploy; the action handles failures based on deployment status
+          # failOnStdErr: true # Remove this line

@@ -150,7 +150,7 @@ done
 
 
 echo ""
-echo "✅ Azure deployment completed. Manual steps remaining:"
+echo "Azure deployment completed. Manual steps remaining:"
 echo "1. SSH into App-VM1 & App-VM2 to set up Flask app."
 echo "2. Reset SSH public key for DB-VM via Azure Portal." 
 echo "3. SSH into DB-VM from App-VM1 to install PostgreSQL and create DB."

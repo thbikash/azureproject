@@ -72,6 +72,7 @@ resource name_vnet 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   }
 }
 
+/*
 resource vmName_ip 'Microsoft.Network/publicIPAddresses@2021-02-01' = {
   name: '${vmName}-ip'
   location: location
@@ -85,6 +86,7 @@ resource vmName_ip 'Microsoft.Network/publicIPAddresses@2021-02-01' = {
     name: 'Standard'
   }
 }
+*/
 
 resource vmName_nic 'Microsoft.Network/networkInterfaces@2021-02-01' = {
   name: '${vmName}-nic'
@@ -97,9 +99,9 @@ resource vmName_nic 'Microsoft.Network/networkInterfaces@2021-02-01' = {
           subnet: {
             id: resourceId('Microsoft.Network/virtualNetworks/subnets', '${resourceGroup().name}-vnet', 'default')
           }
-          publicIPAddress: {
+          /*publicIPAddress: {
             id: vmName_ip.id
-          }
+          }*/
         }
       }
     ]

@@ -25,21 +25,11 @@ jobs:
       - name: Deploy Azure VM using Bicep and Parameter File
         uses: azure/bicep-deploy@v1 # Using the dedicated bicep-deploy action (v1)
         with:
-          # --- REQUIRED: Specify the type of deployment (e.g., 'Resource Group') ---
-          type: 'Resource Group' # This tells the action the scope of your deployment
+          # --- CORRECTED: 'type' must be 'deployment' for a standard ARM/Bicep deployment ---
+          type: 'deployment' # Specifies a standard ARM/Bicep deployment
 
-          # --- Use 'resource-group-name' instead of 'resourceGroupName' ---
           resource-group-name: RG-WebApplication # Your target Azure Resource Group
-
-          # --- 'template-file' is correct for the Bicep template path ---
           template-file: ./VM/azuredeploycustomconfiguration.bicep # Path to your Bicep template
-
-          # --- Use 'parameters-file' for the parameter file and 'parameters' for overrides ---
           parameters-file: ./VM/azuredeploycustomconfiguration.parameters.json # Path to your JSON parameter file
           parameters: adminPassword=${{ secrets.VM_ADMIN_PASSWORD }} # Inline override for the secret password
-
-          # --- For additional arguments like '--debug', use 'additional-arguments' ---
           additional-arguments: --debug # Enable debug logging for Azure CLI commands within this step
-
-          # 'failOnStdErr' is not an input for bicep-deploy; the action handles failures based on deployment status
-          # failOnStdErr: true # Remove this line

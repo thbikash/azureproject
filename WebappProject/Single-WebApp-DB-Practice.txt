@@ -106,7 +106,7 @@ Install python3 and flask app
 =================================
 sudo apt update
 sudo apt install python3-pip -y
-sudo pip3 install flask psycopg2-binary  # ✅ Required fix
+sudo pip3 install flask psycopg2-binary 
 
 # Create the app
 =================
@@ -156,10 +156,10 @@ Step 9: Access App in Browser
 ================================
 Open your browser and visit:
 
-🌐 http://<WebVM1_Public_IP>
+ http://<WebVM1_Public_IP>
 
 You should see:
-✅ Connected to DB! with the current timestamp
+Connected to DB! with the current timestamp
 
 
 

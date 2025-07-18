@@ -1,4 +1,4 @@
-name: Azure VM Bicep Deployment
+name: New Azure VM Bicep Deployment
 
 on:
   push:

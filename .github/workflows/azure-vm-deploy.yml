@@ -26,9 +26,10 @@ jobs:
         uses: azure/bicep-deploy@v1 # Using the dedicated bicep-deploy action (v1)
         with:
           type: 'deployment' # Specifies a standard ARM/Bicep deployment
-
-          # --- CORRECTED: 'operation' must be 'create' ---
           operation: 'create' # Specify the deployment operation for creating/updating
+
+          # --- ADDED: The required 'scope' input ---
+          scope: 'resourcegroup' # Specify the scope of the deployment
 
           resource-group-name: RG-WebApplication # Your target Azure Resource Group
           template-file: ./VM/azuredeploycustomconfiguration.bicep # Path to your Bicep template

@@ -39,6 +39,14 @@ jobs:
           resourceGroupName: ${{ github.event.inputs.resourceGroup }}
           template: ./VM/azuredeploycustomconfiguration.bicep
           parameters: |
-            vmName=${{ github.event.inputs.vmName }}
-            adminUsername=${{ github.event.inputs.adminUsername }}
-            adminPassword=${{ github.event.inputs.adminPassword }}
+            {
+              "vmName": {
+                "value": "${{ github.event.inputs.vmName }}"
+              },
+              "adminUsername": {
+                "value": "${{ github.event.inputs.adminUsername }}"
+              },
+              "adminPassword": {
+                "value": "${{ github.event.inputs.adminPassword }}"
+              }
+            }

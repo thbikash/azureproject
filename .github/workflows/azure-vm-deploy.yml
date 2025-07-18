@@ -26,15 +26,11 @@ jobs:
         uses: azure/bicep-deploy@v1 # Using the dedicated bicep-deploy action (v1)
         with:
           type: 'deployment' # Specifies a standard ARM/Bicep deployment
+
+          # --- ADDED: The required 'operation' input ---
+          operation: 'deploy' # Specify the deployment operation
+
           resource-group-name: RG-WebApplication # Your target Azure Resource Group
           template-file: ./VM/azuredeploycustomconfiguration.bicep # Path to your Bicep template
-
-          # --- CORRECTED: Use 'parameters-file' for the JSON file ---
-          parameters-file: ./VM/azuredeploycustomconfiguration.parameters.json
-
-          # --- CORRECTED: Use 'parameters' ONLY for inline JSON overrides ---
-          # This must be a single-line valid JSON string.
-          parameters: '{"adminPassword": "${{ secrets.VM_ADMIN_PASSWORD }}"}'
-
-          # --- REMOVED: 'additional-arguments' is NOT a valid input for this action ---
-          # (It was already removed in the previous attempt, but just confirming it's absent here)
+          parameters-file: ./VM/azuredeploycustomconfiguration.parameters.json # Path to your JSON parameter file
+          parameters: '{"adminPassword": "${{ secrets.VM_ADMIN_PASSWORD }}"}' # Inline override for the secret password

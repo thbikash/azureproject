@@ -18,14 +18,6 @@ jobs:
         uses: azure/login@v2 # Authenticate to Azure
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }} # Your Azure Service Principal credentials
-          # Output the subscription ID from the login action
-          # This assumes your service principal is scoped to a single subscription.
-          # If it has access to multiple, you might need to specify it in the creds.
-          # For now, let's assume the default behavior is sufficient.
-          # We'll use an output variable to capture it.
-          # Output format is usually login_result.subscriptionId but for this action,
-          # it often automatically uses the logged-in context for subsequent actions.
-          # However, explicitly passing it is better practice.
 
       - name: Debug - List Files in VM directory (Optional, for troubleshooting)
         run: ls -l VM/
@@ -35,12 +27,12 @@ jobs:
         with:
           type: 'deployment' # Specifies a standard ARM/Bicep deployment
           operation: 'create' # Specify the deployment operation for creating/updating
-          scope: 'resourcegroup' # Specify the scope of the deployment
 
-          # --- ADDED: The required 'subscription-id' input ---
-          # This typically comes from the AZURE_CREDENTIALS secret or an Azure CLI command.
-          # The simplest way is often to retrieve it via an Azure CLI command after login.
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }} # Assuming you have this secret
+          # --- CORRECTED: 'scope' must be 'resourceGroup' (camelCase) ---
+          scope: 'resourceGroup' # Specify the scope of the deployment
+
+          # Assuming AZURE_SUBSCRIPTION_ID secret is set up as discussed
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
           resource-group-name: RG-WebApplication # Your target Azure Resource Group
           template-file: ./VM/azuredeploycustomconfiguration.bicep # Path to your Bicep template

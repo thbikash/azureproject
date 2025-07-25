@@ -47,6 +47,9 @@ jobs:
       #     # Verify the installed version
       #     az --version
       #   shell: bash
+      - run: |
+          az account show
+          az group show -n ${{ github.event.inputs.resourceGroup }}
 
       - name: 🚀 Deploy Bicep Template
         uses: azure/arm-deploy@v2

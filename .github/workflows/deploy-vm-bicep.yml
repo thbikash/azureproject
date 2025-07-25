@@ -29,14 +29,13 @@ jobs:
       group_location: ${{ github.event.inputs.group_location }}
     secrets:
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-    
-
-  deploy:
-    needs: call-rg
-    runs-on: ubuntu-latest
-    environment:
-      name: manual-approval
-    steps:
+   
+   deploy:
+     needs: call-rg
+     runs-on: ubuntu-latest
+     environment:
+       name: manual-approval
+     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v3
 

@@ -14,12 +14,25 @@ on:
       adminPassword:
         description: 'Admin password for the VM'
         required: true
-      resourceGroup:
+      group_name:
         description: 'Resource Group for the VM'
-        required: true        
+        required: true     
+      group_location:
+        description: 'Resource Location for the VM'
+        required: true       
 
 jobs:
+   call-rg:
+    uses: ./.github/workflows/deploy-rg.yml
+    with:
+      group_name: ${{ github.event.inputs.group_name }}
+      group_location: ${{ github.event.inputs.group_location }}
+    secrets:
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+    
+
   deploy:
+    needs: call-rg
     runs-on: ubuntu-latest
     environment:
       name: manual-approval
@@ -32,30 +45,12 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # - name: Install specific Azure CLI version (2.75.0) and dependencies
-      #   run: |
-      #     # Uninstall any existing Azure CLI to ensure a clean install
-      #     sudo apt-get remove -y azure-cli || true
-          
-      #     # Ensure pip is up to date
-      #     python3 -m pip install --upgrade pip
-          
-      #     # Install the specific version of azure-cli and its core components
-      #     # Using --force-reinstall to ensure a fresh, complete installation
-      #     python3 -m pip install --force-reinstall azure-cli==2.75.0 azure-cli-core==2.75.0
-          
-      #     # Verify the installed version
-      #     az --version
-      #   shell: bash
-      - run: |
-          az account show
-          az group show -n ${{ github.event.inputs.resourceGroup }}
-
       - name: 🚀 Deploy Bicep Template
         uses: azure/arm-deploy@v2
         with:
           subscriptionId: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
-          resourceGroupName: ${{ github.event.inputs.resourceGroup }}
+          resourceGroupName: ${{ github.event.inputs.group_name }}
+          region: ${{ github.event.inputs.group_location }}
           template: ./VM/azuredeploycustomconfiguration.bicep
           parameters: >
             vmName=${{ github.event.inputs.vmName }}

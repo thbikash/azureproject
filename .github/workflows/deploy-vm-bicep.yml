@@ -32,21 +32,21 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Install specific Azure CLI version (2.75.0) and dependencies
-        run: |
-          # Uninstall any existing Azure CLI to ensure a clean install
-          sudo apt-get remove -y azure-cli || true
+      # - name: Install specific Azure CLI version (2.75.0) and dependencies
+      #   run: |
+      #     # Uninstall any existing Azure CLI to ensure a clean install
+      #     sudo apt-get remove -y azure-cli || true
           
-          # Ensure pip is up to date
-          python3 -m pip install --upgrade pip
+      #     # Ensure pip is up to date
+      #     python3 -m pip install --upgrade pip
           
-          # Install the specific version of azure-cli and its core components
-          # Using --force-reinstall to ensure a fresh, complete installation
-          python3 -m pip install --force-reinstall azure-cli==2.75.0 azure-cli-core==2.75.0
+      #     # Install the specific version of azure-cli and its core components
+      #     # Using --force-reinstall to ensure a fresh, complete installation
+      #     python3 -m pip install --force-reinstall azure-cli==2.75.0 azure-cli-core==2.75.0
           
-          # Verify the installed version
-          az --version
-        shell: bash
+      #     # Verify the installed version
+      #     az --version
+      #   shell: bash
 
       - name: 🚀 Deploy Bicep Template
         uses: azure/arm-deploy@v2

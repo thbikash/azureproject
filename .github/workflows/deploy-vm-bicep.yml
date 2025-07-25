@@ -1,3 +1,7 @@
+###THIS BICEP WILL DO THE FOLLOWING####
+#1. Calls and Creates Resource Group creation template.
+#2. Then Creates Free tier VM
+
 name: Deploy VM Bicep Template
 
 on:

@@ -76,9 +76,7 @@ resource name_vnet 'Microsoft.Network/virtualNetworks@2021-02-01' = {
 resource vmName_ip 'Microsoft.Network/publicIPAddresses@2021-02-01' = {
   name: '${vmName}-ip'
   location: location
-  zones: [
-    '3'
-  ]
+  
   properties: {
     publicIPAllocationMethod: 'Static'
   }
@@ -135,7 +133,10 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
       }
       osDisk: {
         createOption: 'FromImage'
-      }
+        managedDisk: {
+          storageAccountType: 'Standard_LRS' // Standard HDD — free eligible
+        }
+      }   
     }
     networkProfile: {
       networkInterfaces: [

@@ -1,0 +1,9 @@
+July 28- 2025
+====================
+1. Create RG,VM into centralus region using github "Deploy VM Bicep Template" action. This will create VM without public ip.
+
+2. Create Bastion (Developer SKU, other SKU will incur charges) in centralus region. Check carefully that bastion is available in the
+   selected region. Note that the Bastion and the VM must be in same VNET location to access.
+   
+3. Connect to the VM using Bastion created in step 2.   
+

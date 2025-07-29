@@ -120,7 +120,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
       }
       osDisk: {
         createOption: 'FromImage'
-        caching: 'ReadWrite'
+        caching: 'ReadOnly'
         diffDiskSettings: {
           option: 'Local' // ✅ Ephemeral OS Disk (no cost)
         }

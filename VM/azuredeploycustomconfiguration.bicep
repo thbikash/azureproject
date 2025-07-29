@@ -9,11 +9,12 @@ param adminUsername string = 'azureuser'
 param adminPassword string
 
 @description('Size of the VM')
-param vmSize string = 'Standard_B1s' // ✅ Free-tier eligible
+param vmSize string = 'Standard_B1s' // Free-tier eligible
 
 @description('Location for all resources')
-param location string = resourceGroup().location
+param location string = 'centralus' // Using Central US for Bastion Developer
 
+// NSG
 resource vmName_nsg 'Microsoft.Network/networkSecurityGroups@2021-02-01' = {
   name: '${vmName}-nsg'
   location: location
@@ -49,6 +50,7 @@ resource vmName_nsg 'Microsoft.Network/networkSecurityGroups@2021-02-01' = {
   }
 }
 
+// VNet + Subnet
 resource name_vnet 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   name: '${resourceGroup().name}-vnet'
   location: location
@@ -72,6 +74,7 @@ resource name_vnet 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   }
 }
 
+// NIC (no public IP)
 resource vmName_nic 'Microsoft.Network/networkInterfaces@2021-02-01' = {
   name: '${vmName}-nic'
   location: location
@@ -92,11 +95,12 @@ resource vmName_nic 'Microsoft.Network/networkInterfaces@2021-02-01' = {
   ]
 }
 
+// VM with Ephemeral OS Disk
 resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
   name: vmName
   location: location
   tags: {
-    AutoShutdown: 'Enabled' // Optional tag for shutdown policy
+    AutoShutdown: 'Enabled'
   }
   properties: {
     hardwareProfile: {
@@ -116,9 +120,9 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
       }
       osDisk: {
         createOption: 'FromImage'
-        diskSizeGB: 30 // ✅ Explicitly set to 30GB (free-tier safe)
-        managedDisk: {
-          storageAccountType: 'Standard_LRS' // ✅ Cheapest disk
+        caching: 'ReadWrite'
+        diffDiskSettings: {
+          option: 'Local' // ✅ Ephemeral OS Disk (no cost)
         }
       }
     }
@@ -132,6 +136,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
   }
 }
 
+// Install Nginx after deployment
 resource vmName_nginxInstall 'Microsoft.Compute/virtualMachines/extensions@2021-03-01' = {
   parent: vm
   name: 'nginxInstall'

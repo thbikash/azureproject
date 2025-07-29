@@ -9,12 +9,11 @@ param adminUsername string = 'azureuser'
 param adminPassword string
 
 @description('Size of the VM')
-param vmSize string = 'Standard_B1s' // ✅ Changed to free tier eligible
+param vmSize string = 'Standard_B1s' // ✅ Free-tier eligible
 
 @description('Location for all resources')
 param location string = resourceGroup().location
 
-// Network Security Group
 resource vmName_nsg 'Microsoft.Network/networkSecurityGroups@2021-02-01' = {
   name: '${vmName}-nsg'
   location: location
@@ -50,7 +49,6 @@ resource vmName_nsg 'Microsoft.Network/networkSecurityGroups@2021-02-01' = {
   }
 }
 
-// Virtual Network + Subnet
 resource name_vnet 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   name: '${resourceGroup().name}-vnet'
   location: location
@@ -74,7 +72,6 @@ resource name_vnet 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   }
 }
 
-// NIC without Public IP (Free)
 resource vmName_nic 'Microsoft.Network/networkInterfaces@2021-02-01' = {
   name: '${vmName}-nic'
   location: location
@@ -86,7 +83,6 @@ resource vmName_nic 'Microsoft.Network/networkInterfaces@2021-02-01' = {
           subnet: {
             id: resourceId('Microsoft.Network/virtualNetworks/subnets', '${resourceGroup().name}-vnet', 'default')
           }
-          // ✅ No public IP (to avoid cost)
         }
       }
     ]
@@ -96,12 +92,11 @@ resource vmName_nic 'Microsoft.Network/networkInterfaces@2021-02-01' = {
   ]
 }
 
-// Virtual Machine
 resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
   name: vmName
   location: location
   tags: {
-    AutoShutdown: 'Enabled' // Optional tag for auto-shutdown
+    AutoShutdown: 'Enabled' // Optional tag for shutdown policy
   }
   properties: {
     hardwareProfile: {
@@ -121,6 +116,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
       }
       osDisk: {
         createOption: 'FromImage'
+        diskSizeGB: 30 // ✅ Explicitly set to 30GB (free-tier safe)
         managedDisk: {
           storageAccountType: 'Standard_LRS' // ✅ Cheapest disk
         }
@@ -136,7 +132,6 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
   }
 }
 
-// Custom Script to Install Nginx
 resource vmName_nginxInstall 'Microsoft.Compute/virtualMachines/extensions@2021-03-01' = {
   parent: vm
   name: 'nginxInstall'

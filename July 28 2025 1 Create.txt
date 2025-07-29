@@ -1,5 +1,8 @@
 July 28- 2025
 ====================
+azureproject
+------------------
+
 1. Create RG,VM into centralus region using github "Deploy VM Bicep Template" action. This will create VM without public ip.
 
 2. Create Bastion (Developer SKU, other SKU will incur charges) in centralus region. Check carefully that bastion is available in the
@@ -7,3 +10,42 @@ July 28- 2025
    
 3. Connect to the VM using Bastion created in step 2.   
 
+
+WebApp-CICD-Artefactory
+---------------------------
+
+1. Create Azure App Service through BICEP. (Pending)
+
+2. After Creating Azure App Service, please do following manually.
+
+ A) Add this to RG>IAM>Role Assignments (This will provide Service Principal permission with contributor role). 
+
+ az ad sp create-for-rbac --name "github-deployer" --role contributor --scopes /subscriptions/95f113f7-c06e-479d-a4f3-e070f3346c30/resourceGroups/Development-RG --sdk-auth
+ 
+ 
+ B) Find below details from Azure portal and add to github>repositories>settings>secretes and variables.
+ 
+  95f113f7-c06e-479d-a4f3-e070f3346c30 AZURE_SUBSCRIPTION_ID (Found in Subscription)
+  0a524ccd-8a9b-4c52-9ae3-187ac23a775d AZURE_CLIENT_ID ( Created under App-Register > all applications )
+  c6532903-13bc-4ad4-b204-7365f30f931d AZURE_TENANT_ID ( Created under App-Register > all applications )
+ 
+ 3. Then run Action from Github and see if the application is deployed into azure.
+ 
+ 4. Troubleshooting:
+ 
+ A) Check Azure App Services > Monitoring > Log stream 
+ B) Check Azure App Services > Development Tools > Advanced Tolls > Go > bash. Then check files under /home/site/wwwroot
+ 
+ otal 4
+-rwxrwxrwx 1 nobody nogroup    298 Jul 28 21:15 server.js
+-rwxrwxrwx 1 nobody nogroup    329 Jul 28 21:15 package.json
+-rwxrwxrwx 1 nobody nogroup  27883 Jul 28 21:15 package-lock.json
+-rwxrwxrwx 1 nobody nogroup    168 Jul 28 21:15 README.md
+-rwxrwxrwx 1 nobody nogroup 684516 Jul 29 17:23 node_modules.tar.gz
+drwxrwxrwx 2 nobody nogroup   4096 Jul 29 17:23 downloaded
+-rwxrwxrwx 1 nobody nogroup     48 Jul 29 17:23 oryx-manifest.toml
+lrwxrwxrwx 1 nobody nogroup     13 Jul 29 17:24 node_modules -> /node_modules
+kudu_ssh_user@6013dadb855f:~/site/wwwroot$ pwd
+/home/site/wwwroot
+kudu_ssh_user@6013dadb855f:~/site/wwwroot$ 
+ 

@@ -12,7 +12,7 @@ param adminPassword string
 var vmSize = 'Standard_B1s'
 
 // Force free-tier region
-var location = 'eastus'
+var location = 'westus'
 
 // Public IP (Basic Static - free)
 resource publicIp 'Microsoft.Network/publicIPAddresses@2021-02-01' = {

@@ -8,14 +8,26 @@ param adminUsername string = 'azureuser'
 @secure()
 param adminPassword string
 
-@description('Size of the VM')
-param vmSize string = 'Standard_B1s' // Free-tier eligible
+// Force free-tier VM size
+var vmSize = 'Standard_B1s'
 
-@description('Location for all resources')
-param location string = 'centralus' // Using Central US for Bastion Developer
+// Force free-tier region
+var location = 'eastus'
+
+// Public IP (Basic Static - free)
+resource publicIp 'Microsoft.Network/publicIPAddresses@2021-02-01' = {
+  name: '${vmName}-pip'
+  location: location
+  sku: {
+    name: 'Basic'
+  }
+  properties: {
+    publicIPAllocationMethod: 'Static'
+  }
+}
 
 // NSG
-resource vmName_nsg 'Microsoft.Network/networkSecurityGroups@2021-02-01' = {
+resource nsg 'Microsoft.Network/networkSecurityGroups@2021-02-01' = {
   name: '${vmName}-nsg'
   location: location
   properties: {
@@ -51,8 +63,8 @@ resource vmName_nsg 'Microsoft.Network/networkSecurityGroups@2021-02-01' = {
 }
 
 // VNet + Subnet
-resource name_vnet 'Microsoft.Network/virtualNetworks@2021-02-01' = {
-  name: '${resourceGroup().name}-vnet'
+resource vnet 'Microsoft.Network/virtualNetworks@2021-02-01' = {
+  name: '${vmName}-vnet'
   location: location
   properties: {
     addressSpace: {
@@ -66,7 +78,7 @@ resource name_vnet 'Microsoft.Network/virtualNetworks@2021-02-01' = {
         properties: {
           addressPrefix: '10.0.0.0/24'
           networkSecurityGroup: {
-            id: vmName_nsg.id
+            id: nsg.id
           }
         }
       }
@@ -74,8 +86,8 @@ resource name_vnet 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   }
 }
 
-// NIC (no public IP)
-resource vmName_nic 'Microsoft.Network/networkInterfaces@2021-02-01' = {
+// NIC with free static Public IP
+resource nic 'Microsoft.Network/networkInterfaces@2021-02-01' = {
   name: '${vmName}-nic'
   location: location
   properties: {
@@ -84,24 +96,24 @@ resource vmName_nic 'Microsoft.Network/networkInterfaces@2021-02-01' = {
         name: 'ipconfig1'
         properties: {
           subnet: {
-            id: resourceId('Microsoft.Network/virtualNetworks/subnets', '${resourceGroup().name}-vnet', 'default')
+            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnet.name, 'default')
+          }
+          publicIPAddress: {
+            id: publicIp.id
           }
         }
       }
     ]
   }
   dependsOn: [
-    name_vnet
+    vnet
   ]
 }
 
-// VM with Ephemeral OS Disk
+// VM with Standard HDD OS disk (free tier)
 resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
   name: vmName
   location: location
-  tags: {
-    AutoShutdown: 'Enabled'
-  }
   properties: {
     hardwareProfile: {
       vmSize: vmSize
@@ -120,24 +132,30 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
       }
       osDisk: {
         createOption: 'FromImage'
-        caching: 'ReadOnly'
-        diffDiskSettings: {
-          option: 'Local' // ✅ Ephemeral OS Disk (no cost)
+        caching: 'ReadWrite'
+        managedDisk: {
+          storageAccountType: 'Standard_LRS'
         }
+        diskSizeGB: 30 // Free tier eligible
       }
     }
     networkProfile: {
       networkInterfaces: [
         {
-          id: vmName_nic.id
+          id: nic.id
         }
       ]
+    }
+    diagnosticsProfile: {
+      bootDiagnostics: {
+        enabled: false // Avoid extra storage account charges
+      }
     }
   }
 }
 
-// Install Nginx after deployment
-resource vmName_nginxInstall 'Microsoft.Compute/virtualMachines/extensions@2021-03-01' = {
+// VM Extension - Install Nginx
+resource nginxInstall 'Microsoft.Compute/virtualMachines/extensions@2021-03-01' = {
   parent: vm
   name: 'nginxInstall'
   location: location
@@ -147,11 +165,25 @@ resource vmName_nginxInstall 'Microsoft.Compute/virtualMachines/extensions@2021-
     typeHandlerVersion: '2.1'
     autoUpgradeMinorVersion: true
     settings: {
-      fileUris: []
       commandToExecute: 'apt-get update && apt-get install -y nginx && systemctl start nginx'
     }
   }
 }
 
-output adminUsername string = adminUsername
-output vmName string = vmName
+// Auto-shutdown (free)
+resource autoShutdown 'Microsoft.DevTestLab/schedules@2018-09-15' = {
+  name: '${vmName}-shutdown'
+  location: location
+  properties: {
+    status: 'Enabled'
+    taskType: 'ComputeVmShutdownTask'
+    dailyRecurrence: {
+      time: '1900' // 7 PM UTC (adjust if needed)
+    }
+    timeZoneId: 'UTC'
+    targetResourceId: vm.id
+  }
+}
+
+output publicIpAddress string = publicIp.properties.ipAddress
+output sshCommand string = 'ssh ${adminUsername}@' + publicIp.properties.ipAddress

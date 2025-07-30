@@ -186,4 +186,5 @@ resource autoShutdown 'Microsoft.DevTestLab/schedules@2018-09-15' = {
 }
 
 output publicIpAddress string = publicIp.properties.ipAddress
-output sshCommand string = 'ssh ${adminUsername}@' + publicIp.properties.ipAddress
+output sshCommand string = 'ssh ${adminUsername}@${publicIp.properties.ipAddress}'
+

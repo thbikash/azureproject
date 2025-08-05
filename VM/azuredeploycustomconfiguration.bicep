@@ -8,13 +8,10 @@ param adminUsername string = 'azureuser'
 @secure()
 param adminPassword string
 
-// Force free-tier VM size
 var vmSize = 'Standard_B1s'
+var location = 'eastus'
 
-// Force free-tier region
-var location = 'westus'
-
-// Public IP (Basic Static - free)
+// Free Public IP (Basic Static)
 resource publicIp 'Microsoft.Network/publicIPAddresses@2021-02-01' = {
   name: '${vmName}-pip'
   location: location
@@ -26,7 +23,7 @@ resource publicIp 'Microsoft.Network/publicIPAddresses@2021-02-01' = {
   }
 }
 
-// NSG
+// NSG (Allow SSH + HTTP)
 resource nsg 'Microsoft.Network/networkSecurityGroups@2021-02-01' = {
   name: '${vmName}-nsg'
   location: location
@@ -62,7 +59,7 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2021-02-01' = {
   }
 }
 
-// VNet + Subnet
+// VNet + Subnet with NSG
 resource vnet 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   name: '${vmName}-vnet'
   location: location
@@ -86,7 +83,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   }
 }
 
-// NIC with free static Public IP
+// NIC with public IP
 resource nic 'Microsoft.Network/networkInterfaces@2021-02-01' = {
   name: '${vmName}-nic'
   location: location
@@ -105,12 +102,9 @@ resource nic 'Microsoft.Network/networkInterfaces@2021-02-01' = {
       }
     ]
   }
-  dependsOn: [
-    vnet
-  ]
 }
 
-// VM with Standard HDD OS disk (free tier)
+// VM with free-tier configuration
 resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
   name: vmName
   location: location
@@ -136,7 +130,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
         managedDisk: {
           storageAccountType: 'Standard_LRS'
         }
-        diskSizeGB: 30 // Free tier eligible
+        diskSizeGB: 30
       }
     }
     networkProfile: {
@@ -148,13 +142,28 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
     }
     diagnosticsProfile: {
       bootDiagnostics: {
-        enabled: false // Avoid extra storage account charges
+        enabled: false
       }
     }
   }
 }
 
-// VM Extension - Install Nginx
+// Auto-shutdown schedule
+resource autoShutdown 'Microsoft.DevTestLab/schedules@2018-09-15' = {
+  name: '${vmName}-shutdown'
+  location: location
+  properties: {
+    status: 'Enabled'
+    taskType: 'ComputeVmShutdownTask'
+    dailyRecurrence: {
+      time: '1900' // 7 PM UTC
+    }
+    timeZoneId: 'UTC'
+    targetResourceId: vm.id
+  }
+}
+
+// Optional: Install Nginx
 resource nginxInstall 'Microsoft.Compute/virtualMachines/extensions@2021-03-01' = {
   parent: vm
   name: 'nginxInstall'
@@ -170,21 +179,5 @@ resource nginxInstall 'Microsoft.Compute/virtualMachines/extensions@2021-03-01' 
   }
 }
 
-// Auto-shutdown (free)
-resource autoShutdown 'Microsoft.DevTestLab/schedules@2018-09-15' = {
-  name: '${vmName}-shutdown'
-  location: location
-  properties: {
-    status: 'Enabled'
-    taskType: 'ComputeVmShutdownTask'
-    dailyRecurrence: {
-      time: '1900' // 7 PM UTC (adjust if needed)
-    }
-    timeZoneId: 'UTC'
-    targetResourceId: vm.id
-  }
-}
-
 output publicIpAddress string = publicIp.properties.ipAddress
 output sshCommand string = 'ssh ${adminUsername}@${publicIp.properties.ipAddress}'
-

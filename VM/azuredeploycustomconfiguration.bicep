@@ -144,7 +144,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
 }
 
 resource autoShutdown 'Microsoft.DevTestLab/schedules@2018-09-15' = {
-  name: '${vmName}-shutdown'
+  name: 'shutdown-computevm-${vmName}'  // Required format
   location: location
   properties: {
     status: 'Enabled'
@@ -156,6 +156,7 @@ resource autoShutdown 'Microsoft.DevTestLab/schedules@2018-09-15' = {
     targetResourceId: vm.id
   }
 }
+
 
 resource nginxInstall 'Microsoft.Compute/virtualMachines/extensions@2021-03-01' = {
   parent: vm

@@ -11,12 +11,11 @@ param adminPassword string
 var vmSize = 'Standard_B1s'
 var location = 'eastus'
 
-// Free Public IP (Basic Static)
-resource publicIp 'Microsoft.Network/publicIPAddresses@2021-02-01' = {
-  name: '${vmName}-pip'
+resource publicIP 'Microsoft.Network/publicIPAddresses@2023-05-01' = {
+  name: '${vmName}-publicIP'
   location: location
   sku: {
-    name: 'Basic'
+    name: 'Standard' // <- Changed from 'Basic' to 'Standard'
   }
   properties: {
     publicIPAllocationMethod: 'Static'

@@ -22,7 +22,6 @@ resource publicIP 'Microsoft.Network/publicIPAddresses@2023-05-01' = {
   }
 }
 
-// NSG (Allow SSH + HTTP)
 resource nsg 'Microsoft.Network/networkSecurityGroups@2021-02-01' = {
   name: '${vmName}-nsg'
   location: location
@@ -58,7 +57,6 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2021-02-01' = {
   }
 }
 
-// VNet + Subnet with NSG
 resource vnet 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   name: '${vmName}-vnet'
   location: location
@@ -82,7 +80,6 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   }
 }
 
-// NIC with public IP
 resource nic 'Microsoft.Network/networkInterfaces@2021-02-01' = {
   name: '${vmName}-nic'
   location: location
@@ -95,7 +92,7 @@ resource nic 'Microsoft.Network/networkInterfaces@2021-02-01' = {
             id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnet.name, 'default')
           }
           publicIPAddress: {
-            id: publicIp.id
+            id: publicIP.id
           }
         }
       }
@@ -103,7 +100,6 @@ resource nic 'Microsoft.Network/networkInterfaces@2021-02-01' = {
   }
 }
 
-// VM with free-tier configuration
 resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
   name: vmName
   location: location
@@ -147,7 +143,6 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
   }
 }
 
-// Auto-shutdown schedule
 resource autoShutdown 'Microsoft.DevTestLab/schedules@2018-09-15' = {
   name: '${vmName}-shutdown'
   location: location
@@ -162,7 +157,6 @@ resource autoShutdown 'Microsoft.DevTestLab/schedules@2018-09-15' = {
   }
 }
 
-// Optional: Install Nginx
 resource nginxInstall 'Microsoft.Compute/virtualMachines/extensions@2021-03-01' = {
   parent: vm
   name: 'nginxInstall'
@@ -178,5 +172,5 @@ resource nginxInstall 'Microsoft.Compute/virtualMachines/extensions@2021-03-01' 
   }
 }
 
-output publicIpAddress string = publicIp.properties.ipAddress
-output sshCommand string = 'ssh ${adminUsername}@${publicIp.properties.ipAddress}'
+output publicIpAddress string = publicIP.properties.ipAddress
+output sshCommand string = 'ssh ${adminUsername}@${publicIP.properties.ipAddress}'
